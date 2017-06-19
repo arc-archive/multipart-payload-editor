@@ -1,0 +1,396 @@
+<!--
+@license
+Copyright 2017 The Advanced REST client authors <arc@mulesoft.com>
+Licensed under the Apache License, Version 2.0 (the "License"); you may not
+use this file except in compliance with the License. You may obtain a copy of
+the License at
+http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+License for the specific language governing permissions and limitations under
+the License.
+-->
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../arc-icons/arc-icons.html">
+<link rel="import" href="../iron-form/iron-form.html">
+<link rel="import" href="../iron-pages/iron-pages.html">
+<link rel="import" href="../iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../paper-fab-menu/paper-fab-menu.html">
+<link rel="import" href="../paper-fab-menu/paper-fab-menu-item.html">
+<link rel="import" href="../paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../paper-spinner/paper-spinner.html">
+<link rel="import" href="../paper-tooltip/paper-tooltip.html">
+<link rel="import" href="../paper-toast/paper-toast.html">
+<link rel="import" href="../prism-element/prism-highlighter.html">
+<link rel="import" href="../prism-element/prism-theme-default.html">
+<link rel="import" href="../request-payload-editor-behavior/request-payload-editor-behavior.html">
+<link rel="import" href="../multipart-payload-transformer/multipart-payload-transformer.html">
+<link rel="import" href="../clipboard-copy/clipboard-copy.html">
+<link rel="import" href="../arc-polyfills/arc-polyfills.html">
+<link rel="import" href="multipart-text-form-item.html">
+<link rel="import" href="multipart-file-form-item.html">
+<script src="../prism/components/prism-http.min.js"></script>
+<!--
+Multipart payload editor for ARC body editor.
+
+On supported browsers (full support for FormData, Iterator and ArrayBuffer) it will render a
+UI controls to generate payload message preview.
+
+It produces a FormData object that can be used in XHR / Fetch or transformed to ArrayBuffer to be
+used in socket connection.
+
+### Example
+```
+<multipart-payload-editor value="{{form}}"></multipart-payload-editor>
+```
+
+### Styling
+`<multipart-payload-editor>` provides the following custom properties and mixins for styling:
+
+Custom property | Description | Default
+----------------|-------------|----------
+`--multipart-payload-editor` | Mixin applied to the element | `{}`
+`--multipart-payload-editor-paper-fab-menu` | Mixin applied to paper-fab-menu | `{}`
+`--multipart-payload-editor-code-preview` | Mixin applied to a code preview element | `{}`
+`--view-action-bar` | Theme mixin, applied to the content action bar | `{}`
+`--multipart-payload-editor-action-bar` | Mixin applied to the content action bar | `{}`
+`--body-editor-panel-button-active-background-color` | Background color of the active content action button | `#e0e0e0`
+`--body-editor-panel-button-active` | Mixin applied to active content action button | `{}`
+`--content-action-icon-color` | Color of the content action icon | `rgba(0, 0, 0, 0.74)`
+`--content-action-icon-color-hover` | Color of the content action icon when hovered | `--accent-color` or `rgba(0, 0, 0, 0.74)`
+
+@group UI Elements
+@element multipart-payload-editor
+@demo demo/index.html
+-->
+<dom-module id="multipart-payload-editor">
+  <template strip-whitespace>
+    <style include="prism-theme-default"></style>
+    <style>
+     :host {
+      display: block;
+      position: relative;
+      /* For add button */
+      padding-bottom: 120px;
+      @apply(--multipart-payload-editor);
+    }
+
+    paper-fab-menu {
+      position: absolute;
+      bottom: 20px;
+      left: 0px;
+      @apply(--multipart-payload-editor-paper-fab-menu);
+    }
+
+    multipart-text-form-item,
+    multipart-file-form-item {
+      margin-bottom: 8px;
+    }
+
+    code {
+      @apply(--arc-font-code1);
+      white-space: pre-line;
+      word-break: break-all;
+      overflow: auto;
+      @apply(--multipart-payload-editor-code-preview);
+    }
+
+    .editor-actions {
+      @apply(--layout-horizontal);
+      @apply(--layout-center);
+      @apply(--view-action-bar);
+      @apply(--multipart-payload-editor-action-bar);
+    }
+
+    paper-icon-button[active] {
+      background-color: var(--body-editor-panel-button-active-background-color, #e0e0e0);
+      border-radius: 50%;
+      @apply(--body-editor-panel-button-active);
+    }
+
+    .action-button {
+      color: var(--content-action-icon-color, rgba(0, 0, 0, 0.74));
+      transition: color 0.2s linear;
+    }
+
+    .action-button:hover {
+      color: var(--content-action-icon-color-hover, var(--accent-color, rgba(0, 0, 0, 0.74)));
+    }
+    </style>
+    <template is="dom-if" if="[[hasFormDataSupport]]">
+      <div class="editor-actions">
+        <paper-icon-button id="previewIcon" icon="[[_computeToggleIcon(previewOpened)]]" class="action-button" toggles active="{{previewOpened}}" disabled="[[generatingPreview]]"></paper-icon-button>
+        <paper-icon-button id="copyIcon" icon="arc:content-copy" class="action-button" on-tap="_copyToClipboard" disabled="[[generatingPreview]]" hidden$="[[!previewOpened]]"></paper-icon-button>
+        <paper-spinner alt="Loading preview" active="[[generatingPreview]]"></paper-spinner>
+
+        <paper-tooltip for="previewIcon" animation-delay="200">Toggles generated payload message preview</paper-tooltip>
+        <paper-tooltip for="copyIcon" animation-delay="200">Copy payload message</paper-tooltip>
+      </div>
+    </template>
+
+    <section hidden$="[[previewOpened]]">
+      <form is="iron-form" id="form" enctype="multipart/form-data" method="post">
+        <template is="dom-repeat" id="list" items="{{model}}" observe="value">
+          <template is="dom-if" if="[[item.file]]">
+            <multipart-file-form-item name="{{item.name}}" value="{{item.value}}" required auto-validate></multipart-file-form-item>
+          </template>
+          <template is="dom-if" if="[[item.text]]">
+            <multipart-text-form-item has-form-data="[[hasFormDataSupport]]" name="{{item.name}}" value="{{item.value}}" content-type="{{item.contentType}}" required auto-validate></multipart-text-form-item>
+          </template>
+        </template>
+      </form>
+      <paper-fab-menu color="#FF5722" icon="arc:add" id="fabMenu">
+        <paper-fab-menu-item tooltip-position="right" color="#FF8A65" tooltip="Add file" icon="arc:insert-drive-file" on-tap="addFile"></paper-fab-menu-item>
+        <paper-fab-menu-item tooltip-position="right" color="#FF8A65" tooltip="Add text" icon="arc:short-text" on-tap="addText"></paper-fab-menu-item>
+      </paper-fab-menu>
+    </section>
+
+    <section hidden$="[[!previewOpened]]">
+      <code></code>
+    </section>
+
+    <multipart-payload-transformer></multipart-payload-transformer>
+    <prism-highlighter></prism-highlighter>
+    <clipboard-copy content="[[messagePreview]]"></clipboard-copy>
+    <paper-toast horizontal-align="right"></paper-toast>
+  </template>
+  <script>
+  Polymer({
+    is: 'multipart-payload-editor',
+
+    behaviors: [ArcBehaviors.RequestPayloadEditorBehavior],
+
+    properties: {
+      /**
+       * Map of current form values.
+       */
+      model: Array,
+      // Value of this form
+      value: {
+        type: Object,
+        notify: true
+      },
+      // True if the browser has native FormData support
+      hasFormDataSupport: {
+        type: Boolean,
+        value: function() {
+          try {
+            var fd = new FormData();
+            fd.append('test', new Blob(['.'], {type: 'image/jpg'}), 'test.jpg');
+            return ('entries' in fd);
+          } catch (e) {
+            return false;
+          }
+        }
+      },
+      // true if the message preview is opened
+      previewOpened: Boolean,
+      // true if the transformer is generating the message
+      generatingPreview: Boolean,
+      // Generated body message preview
+      messagePreview: String
+    },
+
+    observers: [
+      '_valueChanged(value)',
+      '_modelChanged(model.*)',
+      '__isOpenedChanged(_isOpened)',
+      '_previewOpenedChanged(previewOpened)'
+    ],
+
+    listeners: {
+      'remove-multipart-form-item': '_itemRemoveHandler'
+    },
+
+    __isOpenedChanged: function(opened) {
+      if (opened && !this.model) {
+        this.addFile();
+      }
+    },
+
+    /**
+     * Appends new file form row.
+     * This changes `model`.
+     */
+    addFile: function() {
+      this.$.fabMenu.opened = false;
+      var item = {
+        name: '',
+        value: undefined,
+        file: true
+      };
+      if (!this.model) {
+        this.set('model', [item]);
+      } else {
+        this.push('model', item);
+      }
+    },
+    /**
+     * Appends empty text field to the form.
+     * This changes `model`.
+     */
+    addText: function() {
+      this.$.fabMenu.opened = false;
+      var item = {
+        name: '',
+        value: '',
+        text: true
+      };
+      if (this.hasFormDataSupport) {
+        item.contentType = '';
+      }
+      if (!this.model) {
+        this.set('model', [item]);
+      } else {
+        this.push('model', item);
+      }
+    },
+
+    /**
+     * Handler for value change.
+     * If the element is opened then it will fire change event.
+     */
+    _valueChanged: function(value) {
+      this.fire('payload-value-changed', {
+        value: value
+      });
+    },
+    // Generates a message and displays highlighted content of the message.
+    _previewOpenedChanged: function(opened) {
+      if (opened) {
+        if (!this.value) {
+          var toast = this.$$('paper-toast');
+          toast.text = 'Add a valid form items first';
+          toast.opened = true;
+          this.previewOpened = false;
+          return;
+        }
+        this._generatePreview()
+        .then(function(preview) {
+          if (!preview) {
+            this.previewOpened = false;
+            return;
+          }
+          var event = this.fire('syntax-highlight', {
+            code: preview,
+            lang: 'http'
+          }, {composed: true});
+          this.$$('code').innerHTML = event.detail.code || preview;
+        }.bind(this));
+      }
+    },
+
+    _computeToggleIcon: function(previewOpened) {
+      return previewOpened ? 'arc:visibility-off' : 'arc:visibility';
+    },
+
+    _itemRemoveHandler: function(e) {
+      e.stopPropagation();
+
+      var target = Polymer.dom(e).rootTarget;
+      var index = this.$.list.indexForElement(target);
+      this.splice('model', index, 1);
+    },
+    // Called when the model chage. Regenerates the FormData object.
+    _modelChanged: function(record) {
+      if (!record || !record.path) {
+        return;
+      }
+      if (record.path === 'model.splices') {
+        return;
+      }
+      var formData = this.createFormData(record.base);
+      this.set('value', formData);
+    },
+    /**
+     * Generates FormData from the model.
+     * For the browsers with full FormData support it will generate Form data object from form
+     * element. It means that it will have only basic support.
+     * For browsers with full FormData support it will contain all properties (including
+     * mime types).
+     */
+    createFormData: function(model) {
+      if (this.hasFormDataSupport) {
+        return this._getFormData(model);
+      } else {
+        return new FormData(this.$.form);
+      }
+    },
+    /**
+     * Generates the FormData object from the model instead of the form.
+     *
+     * @param {Array} model The model to generate form data from.
+     * @return {FormData|undefined} Form data from model or undefined if model is empty.
+     */
+    _getFormData: function(model) {
+      if (!model || !model.length) {
+        return;
+      }
+      var fd = new FormData();
+      var hasValue = false;
+      model.forEach(function(item) {
+        if (!item.value || !item.name) {
+          return;
+        }
+        if (item.file) {
+          fd.append(item.name, item.value);
+          hasValue = true;
+        } else {
+          if (item.contentType) {
+            var blob = new Blob([item.value], {type: item.contentType});
+            fd.append(item.name, blob);
+          } else {
+            fd.append(item.name, item.value);
+          }
+          hasValue = true;
+        }
+      });
+      return hasValue ? fd : undefined;
+    },
+    /**
+     * Generates a preview message from the FormData object.
+     *
+     * @return {Promise} A promise fulfilled with the content. Content can be undefined
+     * if message couldn't be generated because of lack of support.
+     */
+    _generatePreview: function() {
+      this.set('messagePreview', undefined);
+      this.set('generatingPreview', true);
+      var transformer = this.$$('multipart-payload-transformer');
+      transformer.formData = this.value;
+      return transformer.generatePreview()
+      .then(function(preview) {
+        this.set('generatingPreview', false);
+        this.set('messagePreview', preview);
+        return preview;
+      }.bind(this))
+      .catch(function(cause) {
+        this.set('generatingPreview', false);
+        var toast = this.$$('paper-toast');
+        toast.text = cause.message;
+        toast.opened = true;
+      }.bind(this));
+    },
+    // Handler for copy to clipboard click.
+    _copyToClipboard: function() {
+      var elm = this.$$('clipboard-copy');
+      if (elm.copy()) {
+        this.$$('#copyIcon').icon = 'arc:done';
+      } else {
+        this.$$('#copyIcon').icon = 'arc:error';
+        var toast = this.$$('paper-toast');
+        toast.text = 'Copy command is disabled in your browser.';
+        toast.opened = true;
+      }
+      if (this.__copyButtonAsync) {
+        this.cancelAsync(this.__copyButtonAsync);
+      }
+      this.__copyButtonAsync = this.async(function() {
+        this.$$('#copyIcon').icon = 'arc:content-copy';
+        this.__copyButtonAsync = undefined;
+      }, 1000);
+    }
+  });
+  </script>
+</dom-module>

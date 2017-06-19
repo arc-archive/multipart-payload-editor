@@ -1,0 +1,325 @@
+<!doctype html>
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+
+    <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+    <script src="../../web-component-tester/browser.js"></script>
+    <script src="../../iron-test-helpers/test-helpers.js"></script>
+    <script src="../../iron-test-helpers/mock-interactions.js"></script>
+    <link rel="import" href="../multipart-payload-editor.html">
+  </head>
+  <body>
+
+    <test-fixture id="basic">
+      <template>
+        <multipart-payload-editor></multipart-payload-editor>
+      </template>
+    </test-fixture>
+
+    <script>
+    /* global fixture, assert, TestHelpers */
+    suite('multipart-payload-editor', function() {
+      suite('basic', function() {
+        var element;
+
+        setup(function() {
+          element = fixture('basic');
+          TestHelpers.forceXIfStamp(element);
+        });
+
+        test('model is an array', function() {
+          assert.typeOf(element.model, 'array');
+        });
+
+        test('model has one item', function() {
+          assert.lengthOf(element.model, 1);
+        });
+
+        test('added item is a file', function() {
+          assert.isTrue(element.model[0].file);
+        });
+
+        test('value is undefined', function() {
+          assert.isUndefined(element.value);
+        });
+
+        test('value is messagePreview', function() {
+          assert.isUndefined(element.messagePreview);
+        });
+
+        test('previewOpened is false', function() {
+          assert.isFalse(element.previewOpened);
+        });
+
+        test('generatingPreview is undefined', function() {
+          assert.isUndefined(element.generatingPreview);
+        });
+      });
+
+      suite('addFile()', function() {
+        var element;
+
+        setup(function() {
+          element = fixture('basic');
+          element.addFile();
+        });
+
+        test('model is an array', function() {
+          assert.typeOf(element.model, 'array');
+        });
+
+        test('model has two item', function() {
+          assert.lengthOf(element.model, 2);
+        });
+
+        test('added item is a file', function() {
+          assert.isTrue(element.model[1].file);
+        });
+
+        test('added item has empty name', function() {
+          assert.equal(element.model[1].name, '');
+        });
+
+        test('added item value is undefined', function() {
+          assert.isUndefined(element.model[1].value);
+        });
+      });
+
+      suite('addText()', function() {
+        var element;
+
+        setup(function() {
+          element = fixture('basic');
+          element.addText();
+        });
+
+        function hasAdvancedSupport() {
+          return element.hasFormDataSupport;
+        }
+
+        test('model is an array', function() {
+          assert.typeOf(element.model, 'array');
+        });
+
+        test('model has one item', function() {
+          assert.lengthOf(element.model, 2);
+        });
+
+        test('added item is a text', function() {
+          assert.isTrue(element.model[1].text);
+        });
+
+        test('added item has empty name', function() {
+          assert.equal(element.model[1].name, '');
+        });
+
+        test('added item has empty value', function() {
+          assert.equal(element.model[1].value, '');
+        });
+
+        test('added item has empty contentType', TestHelpers.skipUnless(hasAdvancedSupport, function() {
+          assert.equal(element.model[1].contentType, '');
+        }));
+      });
+
+      suite('createFormData()', function() {
+        var element;
+
+        setup(function() {
+          element = fixture('basic');
+        });
+
+        test('Do not generate FormData with empty model', function() {
+          assert.isUndefined(element.createFormData([]));
+        });
+
+        test('Do not generate FormData data for model with empty values', function() {
+          assert.isUndefined(element.createFormData([{name: '', file: true}]));
+        });
+
+        test('Generates form data for text value', function() {
+          var fd = element.createFormData([{name: 'test', value: 'test', text: true}]);
+          assert.typeOf(fd, 'formdata');
+        });
+
+        test('Generates form data for text value with content type', function() {
+          var fd = element.createFormData([{
+            name: 'test',
+            value: 'test',
+            text: true,
+            contentType: 'application/json'
+          }]);
+          assert.typeOf(fd, 'formdata');
+        });
+
+        test('Generates form data for file value', function() {
+          var fd = element.createFormData([{
+            name: 'test',
+            value: new Blob(['test'], {type: 'application/json'}),
+            file: true
+          }]);
+          assert.typeOf(fd, 'formdata');
+        });
+      });
+
+      suite('_itemRemoveHandler()', function() {
+        var element;
+
+        setup(function() {
+          element = fixture('basic');
+          TestHelpers.forceXIfStamp(element);
+        });
+
+        test('Removes item from the model', function() {
+          var item = element.$$('multipart-file-form-item');
+          item.removeItem();
+          assert.lengthOf(element.model, 0);
+        });
+
+        test('sets value to undefined', function() {
+          element.set(['model', 0, 'name'], 'test');
+          element.set(['model', 0, 'value'], 'test');
+          element.set(['model', 0, 'file'], false);
+          element.set(['model', 0, 'text'], true);
+          TestHelpers.forceXIfStamp(element);
+          assert.typeOf(element.value, 'formdata', 'FormData is created for value');
+
+          var item = element.$$('multipart-text-form-item');
+          item.removeItem();
+          assert.isUndefined(element.value);
+        });
+      });
+
+      suite('action controls', function() {
+        var element;
+
+        setup(function() {
+          element = fixture('basic');
+          TestHelpers.forceXIfStamp(element);
+        });
+
+        function hasAdvancedSupport() {
+          return element.hasFormDataSupport;
+        }
+
+        function advancedSupportDisabled() {
+          return !element.hasFormDataSupport;
+        }
+
+        test('editor-actions are rendered', TestHelpers.skipUnless(hasAdvancedSupport, function() {
+          var container = element.$$('.editor-actions');
+          assert.ok(container);
+        }));
+
+        test('editor-actions are rendered', TestHelpers.skipUnless(advancedSupportDisabled, function() {
+          var container = element.$$('.editor-actions');
+          assert.notOk(container);
+        }));
+
+      });
+
+      suite('_generatePreview()', function() {
+        var element;
+
+        setup(function() {
+          element = fixture('basic');
+        });
+
+        function hasAdvancedSupport() {
+          return element.hasFormDataSupport;
+        }
+
+        test('Generates preview data for file', TestHelpers.skipUnless(hasAdvancedSupport, function() {
+          var fd = element.createFormData([{
+            name: 'test',
+            value: 'test',
+            text: true,
+            contentType: 'application/json'
+          }]);
+          element.value = fd;
+          return element._generatePreview()
+          .then(function(content) {
+            assert.typeOf(content, 'strnig');
+          });
+        }));
+
+        test('Generates preview data for text', TestHelpers.skipUnless(hasAdvancedSupport, function() {
+          var fd = element.createFormData([{name: 'test', value: 'test', text: true}]);
+          element.value = fd;
+          return element._generatePreview()
+          .then(function(content) {
+            assert.typeOf(content, 'strnig');
+          });
+        }));
+
+        test('messagePreview is cleared', TestHelpers.skipUnless(hasAdvancedSupport, function() {
+          var fd = element.createFormData([{name: 'test', value: 'test', text: true}]);
+          element.value = fd;
+          return element._generatePreview();
+          assert.isUndefined(element.messagePreview);
+        }));
+
+        test('messagePreview is set after finish', TestHelpers.skipUnless(hasAdvancedSupport, function() {
+          var fd = element.createFormData([{name: 'test', value: 'test', text: true}]);
+          element.value = fd;
+          return element._generatePreview()
+          .then(function() {
+            assert.typeOf(element.messagePreview, 'strnig');
+          });
+        }));
+
+        test('generatingPreview is true when working', TestHelpers.skipUnless(hasAdvancedSupport, function() {
+          var fd = element.createFormData([{name: 'test', value: 'test', text: true}]);
+          element.value = fd;
+          return element._generatePreview();
+          assert.isTrue(element.generatingPreview);
+        }));
+
+        test('generatingPreview is false after finish', TestHelpers.skipUnless(hasAdvancedSupport, function() {
+          var fd = element.createFormData([{name: 'test', value: 'test', text: true}]);
+          element.value = fd;
+          return element._generatePreview()
+          .then(function() {
+            assert.isFalse(element.generatingPreview);
+          });
+        }));
+      });
+
+      suite('model change notifier', function() {
+        var element;
+
+        setup(function() {
+          element = fixture('basic');
+        });
+
+        test('Sets a value', function() {
+          element.set(['model', 0, 'name'], 'test');
+          element.set(['model', 0, 'value'], 'test');
+          assert.typeOf(element.value, 'formdata');
+        });
+
+        test('Fires payload-value-changed event', function() {
+          var spy = sinon.stub();
+          element.addEventListener('payload-value-changed', spy);
+
+          element.set(['model', 0, 'name'], 'test');
+          element.set(['model', 0, 'value'], 'test');
+          assert.isTrue(spy.calledOnce);
+        });
+      });
+    });
+    </script>
+
+  </body>
+</html>

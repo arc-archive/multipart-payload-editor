@@ -1,0 +1,155 @@
+<!--
+@license
+Copyright 2017 The Advanced REST client authors <arc@mulesoft.com>
+Licensed under the Apache License, Version 2.0 (the "License"); you may not
+use this file except in compliance with the License. You may obtain a copy of
+the License at
+http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+License for the specific language governing permissions and limitations under
+the License.
+-->
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../paper-input/paper-input.html">
+<link rel="import" href="../paper-button/paper-button.html">
+<link rel="import" href="../paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../paper-input/paper-textarea.html">
+<link rel="import" href="../paper-autocomplete/paper-autocomplete.html">
+<link rel="import" href="../iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../arc-icons/arc-icons.html">
+<link rel="import" href="../paper-tooltip/paper-tooltip.html">
+<link rel="import" href="multipart-form-item-behavior.html">
+<!--
+A text form item.
+
+If the browser has native support for FormData (and iterators) then it will also render
+a content type selector for the input field.
+-->
+<dom-module id="multipart-text-form-item">
+  <template>
+    <style>
+    :host {
+      display: block;
+      @apply(--layout-vertical);
+      @apply(--layout-flex);
+    }
+
+    .mime-selector {
+      position: relative;
+    }
+
+    .value-selector {
+      @apply(--layout-horizontal);
+      @apply(--layout-center);
+    }
+
+    paper-textarea {
+      @apply(--layout-flex);
+      margin-left: 12px;
+    }
+
+    .mime-selector paper-input {
+      max-width: 360px;
+    }
+
+    .name-field {
+      max-width: 360px;
+      @apply(--layout-flex);
+    }
+
+    .delete-icon {
+      color: var(--inline-fom-action-icon-color, rgba(0, 0, 0, 0.74));
+      transition: color 0.2s linear;
+    }
+
+    .delete-icon:hover {
+      color: var(--inline-fom-action-icon-color-hover, var(--accent-color, rgba(0, 0, 0, 0.74)));
+    }
+    </style>
+    <template is="dom-if" if="[[hasFormData]]">
+      <div class="mime-selector">
+        <paper-input label="Content type (Optional)" value="{{contentType}}" no-label-float></paper-input>
+        <paper-autocomplete target="[[_mimeInput]]" source="[[suggestions]]" open-on-focus></paper-autocomplete>
+      </div>
+    </template>
+    <div class="value-selector">
+      <paper-input class="name-field" label="Field name" error-message="The name is required" required auto-validate value="{{name}}" no-label-float></paper-input>
+      <paper-textarea label="Field value" value="{{value}}" no-label-float></paper-textarea>
+      <span>
+        <paper-icon-button icon="arc:close" on-tap="removeItem" class="delete-icon"></paper-icon-button>
+        <paper-tooltip animation-delay="200">Remove this form parameter</paper-tooltip>
+      </span>
+    </div>
+  </template>
+  <script>
+  Polymer({
+    is: 'multipart-text-form-item',
+
+    behaviors: [ArcBehaviors.MultipartFormItemBehavior],
+
+    properties: {
+      /**
+       * Reference to the mime type input
+       */
+      _mimeInput: {
+        type: HTMLElement
+      },
+      // A content type of the form field to be presented in the Multipart request.
+      contentType: {
+        type: String,
+        notify: true
+      },
+      // List of suggested mime types
+      suggestions: {
+        type: Array,
+        value: function() {
+          return [
+            'multipart-form-data',
+            'application/x-www-form-urlencoded',
+            'application/json',
+            'application/xml',
+            'application/base64',
+            'application/octet-stream',
+            'text/plain',
+            'text/css',
+            'text/html',
+            'application/javascript'
+          ];
+        }
+      },
+      // If set it will also renders mime type selector for the input data.
+      hasFormData: Boolean
+    },
+
+    observers: [
+      '_hasFormDataChanged(hasFormData)'
+    ],
+
+    ready: function() {
+      if (this.hasFormData) {
+        this._setAutocompleteTarget();
+      }
+    },
+
+    _getValidity: function() {
+      return !!(this.name && this.value);
+    },
+
+    _hasFormDataChanged: function(hasFormData) {
+      if (hasFormData) {
+        this._setAutocompleteTarget();
+      } else {
+        this.set('_mimeInput', undefined);
+      }
+    },
+
+    _setAutocompleteTarget: function() {
+      Polymer.RenderStatus.afterNextRender(this, function() {
+        this.set('_mimeInput', this.$$('.mime-selector paper-input'));
+      });
+    }
+  });
+  </script>
+</dom-module>
