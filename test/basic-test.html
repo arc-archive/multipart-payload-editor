@@ -27,8 +27,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       </template>
     </test-fixture>
 
+    <test-fixture id="opened">
+      <template>
+        <multipart-payload-editor attr-for-opened="opened"></multipart-payload-editor>
+      </template>
+    </test-fixture>
+
     <script>
-    /* global fixture, assert, TestHelpers */
+    /* global fixture, assert, TestHelpers, sinon */
     suite('multipart-payload-editor', function() {
       suite('basic', function() {
         var element;
@@ -266,11 +272,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         test('messagePreview is cleared', TestHelpers.skipUnless(hasAdvancedSupport, function() {
           var fd = element.createFormData([{name: 'test', value: 'test', text: true}]);
           element.value = fd;
-          return element._generatePreview();
+          element._generatePreview();
           assert.isUndefined(element.messagePreview);
         }));
 
-        test('messagePreview is set after finish', TestHelpers.skipUnless(hasAdvancedSupport, function() {
+        test('messagePreview is set after finish',
+          TestHelpers.skipUnless(hasAdvancedSupport, function() {
           var fd = element.createFormData([{name: 'test', value: 'test', text: true}]);
           element.value = fd;
           return element._generatePreview()
@@ -279,14 +286,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           });
         }));
 
-        test('generatingPreview is true when working', TestHelpers.skipUnless(hasAdvancedSupport, function() {
+        test('generatingPreview is true when working',
+          TestHelpers.skipUnless(hasAdvancedSupport, function() {
           var fd = element.createFormData([{name: 'test', value: 'test', text: true}]);
           element.value = fd;
-          return element._generatePreview();
+          element._generatePreview();
           assert.isTrue(element.generatingPreview);
         }));
 
-        test('generatingPreview is false after finish', TestHelpers.skipUnless(hasAdvancedSupport, function() {
+        test('generatingPreview is false after finish',
+          TestHelpers.skipUnless(hasAdvancedSupport, function() {
           var fd = element.createFormData([{name: 'test', value: 'test', text: true}]);
           element.value = fd;
           return element._generatePreview()
@@ -317,6 +326,49 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           element.set(['model', 0, 'value'], 'test');
           assert.isTrue(spy.calledOnce);
         });
+      });
+
+      suite('attr-for-opened', function() {
+        var element;
+
+        setup(function() {
+          element = fixture('opened');
+          TestHelpers.forceXIfStamp(element);
+        });
+
+        test('Do not modifies the value if not opened', function() {
+          var compare = element.value;
+          element.set(['model', 0, 'name'], 'test');
+          element.set(['model', 0, 'value'], 'test');
+          assert.equal(element.value, compare);
+        });
+
+        test('Modifies the value when opened', function() {
+          var compare = element.value;
+          element.setAttribute('opened', true);
+          element.set(['model', 0, 'name'], 'test');
+          element.set(['model', 0, 'value'], 'test');
+          assert.notEqual(element.value, compare);
+        });
+
+        test('Do not fires payload-value-changed event', function() {
+          var spy = sinon.stub();
+          element.addEventListener('payload-value-changed', spy);
+
+          element.set(['model', 0, 'name'], 'test');
+          element.set(['model', 0, 'value'], 'test');
+          assert.isFalse(spy.called);
+        });
+
+        test('Fires payload-value-changed event when opened', function() {
+          var spy = sinon.stub();
+          element.addEventListener('payload-value-changed', spy);
+          element.setAttribute('opened', true);
+          element.set(['model', 0, 'name'], 'test');
+          element.set(['model', 0, 'value'], 'test');
+          assert.isTrue(spy.calledOnce);
+        });
+
       });
     });
     </script>
