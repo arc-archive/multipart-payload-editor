@@ -193,8 +193,8 @@ Custom property | Description | Default
     },
 
     observers: [
-      '_valueChanged(value)',
-      '_modelChanged(model.*)',
+      '_valueChanged(value, _isOpened)',
+      '_modelChanged(model.*, _isOpened)',
       '__isOpenedChanged(_isOpened)',
       '_previewOpenedChanged(previewOpened)'
     ],
@@ -251,7 +251,10 @@ Custom property | Description | Default
      * Handler for value change.
      * If the element is opened then it will fire change event.
      */
-    _valueChanged: function(value) {
+    _valueChanged: function(value, _isOpened) {
+      if (!_isOpened) {
+        return;
+      }
       this.fire('payload-value-changed', {
         value: value
       });
@@ -293,7 +296,10 @@ Custom property | Description | Default
       this.splice('model', index, 1);
     },
     // Called when the model chage. Regenerates the FormData object.
-    _modelChanged: function(record) {
+    _modelChanged: function(record, _isOpened) {
+      if (!_isOpened) {
+        return;
+      }
       if (!record || !record.path) {
         return;
       }
