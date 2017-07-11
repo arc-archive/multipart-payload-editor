@@ -185,7 +185,10 @@ Custom property | Description | Default
         }
       },
       // true if the message preview is opened
-      previewOpened: Boolean,
+      previewOpened: {
+        type: Boolean,
+        value: false
+      },
       // true if the transformer is generating the message
       generatingPreview: Boolean,
       // Generated body message preview
@@ -193,8 +196,8 @@ Custom property | Description | Default
     },
 
     observers: [
-      '_valueChanged(value)',
-      '_modelChanged(model.*)',
+      '_valueChanged(value, _isOpened)',
+      '_modelChanged(model.*, _isOpened)',
       '__isOpenedChanged(_isOpened)',
       '_previewOpenedChanged(previewOpened)'
     ],
@@ -251,7 +254,10 @@ Custom property | Description | Default
      * Handler for value change.
      * If the element is opened then it will fire change event.
      */
-    _valueChanged: function(value) {
+    _valueChanged: function(value, _isOpened) {
+      if (!_isOpened) {
+        return;
+      }
       this.fire('payload-value-changed', {
         value: value
       });
@@ -293,7 +299,10 @@ Custom property | Description | Default
       this.splice('model', index, 1);
     },
     // Called when the model chage. Regenerates the FormData object.
-    _modelChanged: function(record) {
+    _modelChanged: function(record, _isOpened) {
+      if (!_isOpened) {
+        return;
+      }
       if (!record || !record.path) {
         return;
       }
@@ -314,7 +323,7 @@ Custom property | Description | Default
       if (this.hasFormDataSupport) {
         return this._getFormData(model);
       } else {
-        return new FormData(this.$.form);
+        return this._getLegacyFormData(model);
       }
     },
     /**
@@ -330,10 +339,13 @@ Custom property | Description | Default
       var fd = new FormData();
       var hasValue = false;
       model.forEach(function(item) {
-        if (!item.value || !item.name) {
+        if (!item.name) {
           return;
         }
         if (item.file) {
+          if (!item.value) {
+            return;
+          }
           fd.append(item.name, item.value);
           hasValue = true;
         } else {
@@ -347,6 +359,33 @@ Custom property | Description | Default
         }
       });
       return hasValue ? fd : undefined;
+    },
+    /**
+     * Returns a FormData object depending if current form has any value.
+     * Text items can be empty.
+     *
+     * @param {Array} model The model to generate form data from.
+     * @return {FormData|undefined} Form data from model or undefined if model
+     * is empty.
+     */
+    _getLegacyFormData: function(model) {
+      if (!model || !model.length) {
+        return;
+      }
+      var values = model.map(function(item) {
+        if (!item.name) {
+          return;
+        }
+        return item.value;
+      });
+      var hasValue = false;
+      for (var i = 0, len = values.length; i < len; i++) {
+        if (!!values[i]) {
+          hasValue = true;
+          break;
+        }
+      }
+      return hasValue ? new FormData(this.$.form) : undefined;
     },
     /**
      * Generates a preview message from the FormData object.
