@@ -127,11 +127,11 @@ A file form item.
     },
 
     _getValidity: function() {
-      return !!(this.name && this.value && this.value.name);
+      return !!(this.name && this.value instanceof Blob);
     },
 
     _computeHasFile: function(value) {
-      return !!(this.value && this.value.name);
+      return !!(value && value instanceof Blob);
     },
 
     /**
