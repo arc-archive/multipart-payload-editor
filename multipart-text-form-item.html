@@ -13,13 +13,15 @@ the License.
 -->
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="../paper-input/paper-input.html">
-<link rel="import" href="../paper-button/paper-button.html">
 <link rel="import" href="../paper-icon-button/paper-icon-button.html">
-<link rel="import" href="../paper-input/paper-textarea.html">
 <link rel="import" href="../paper-autocomplete/paper-autocomplete.html">
 <link rel="import" href="../iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="../arc-icons/arc-icons.html">
 <link rel="import" href="../paper-tooltip/paper-tooltip.html">
+<link rel="import" href="../raml-type-form-input/raml-type-form-input.html">
+<link rel="import" href="../marked-element/marked-element.html">
+<link rel="import" href="../markdown-styles/markdown-styles.html">
+<link rel="import" href="../iron-collapse/iron-collapse.html">
 <link rel="import" href="multipart-form-item-behavior.html">
 <!--
 A text form item.
@@ -29,11 +31,16 @@ a content type selector for the input field.
 -->
 <dom-module id="multipart-text-form-item">
   <template>
+    <style include="markdown-styles"></style>
     <style>
     :host {
       display: block;
-      @apply(--layout-vertical);
-      @apply(--layout-flex);
+      @apply --layout-flex;
+    }
+
+    .multipart-item {
+      @apply --layout-vertical;
+      @apply --layout-flex;
     }
 
     .mime-selector {
@@ -41,12 +48,12 @@ a content type selector for the input field.
     }
 
     .value-selector {
-      @apply(--layout-horizontal);
-      @apply(--layout-center);
+      @apply --layout-horizontal;
+      @apply --layout-center;
     }
 
-    paper-textarea {
-      @apply(--layout-flex);
+    raml-type-form-input {
+      @apply --layout-flex;
       margin-left: 12px;
     }
 
@@ -56,32 +63,67 @@ a content type selector for the input field.
 
     .name-field {
       max-width: 360px;
-      @apply(--layout-flex);
+      @apply --layout-flex;
     }
 
-    .delete-icon {
-      color: var(--inline-fom-action-icon-color, rgba(0, 0, 0, 0.74));
+    .markdown-html p:first-child {
+      margin-top: 0;
+      padding-top: 0;
+    }
+
+    .markdown-html p:last-child {
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .docs {
+      @apply --arc-font-common-base;
+      font-size: 13px !important;
+      font-weight: 200;
+      line-height: 24px;
+      color: var(--inline-documentation-color, rgba(0, 0, 0, 0.87));
+    }
+
+    .help-icon {
+      color: var(--from-row-action-icon-color, var(--icon-button-color, rgba(0, 0, 0, 0.74)));
       transition: color 0.2s linear;
     }
 
-    .delete-icon:hover {
-      color: var(--inline-fom-action-icon-color-hover, var(--accent-color, rgba(0, 0, 0, 0.74)));
+    .help-icon:hover {
+      color: var(--from-row-action-icon-color-hover, var(--accent-color, rgba(0, 0, 0, 0.74)));
+    }
+
+    paper-autocomplete {
+      top: 34px;
     }
     </style>
-    <template is="dom-if" if="[[hasFormData]]">
-      <div class="mime-selector">
-        <paper-input label="Content type (Optional)" value="{{contentType}}" no-label-float></paper-input>
-        <paper-autocomplete target="[[_mimeInput]]" source="[[suggestions]]" open-on-focus></paper-autocomplete>
+    <div class="multipart-item">
+      <template is="dom-if" if="[[hasFormData]]">
+        <div class="mime-selector">
+          <paper-input label="Content type (Optional)" value="{{contentType}}" no-label-float></paper-input>
+          <paper-autocomplete target="[[_mimeInput]]" source="[[suggestions]]" open-on-focus></paper-autocomplete>
+        </div>
+      </template>
+      <div class="value-selector">
+        <paper-input class="name-field" label="Field name" error-message="The name is required" required auto-validate value="{{name}}" no-label-float></paper-input>
+        <raml-type-form-input model="[[model]]" name="[[name]]" value="{{value}}" no-label-float></raml-type-form-input>
+        <template is="dom-if" if="[[model.hasDescription]]">
+          <span>
+            <paper-icon-button class="help-icon" suffix icon="arc:help-outline" hidden$="[[!model.hasDescription]]" on-tap="toggleDocumentation"></paper-icon-button>
+            <paper-tooltip position="left" offset="1" margin-top="1" animation-delay="300">Display documentation</paper-tooltip>
+          </span>
+        </template>
+      </div>
+    </div>
+    <template is="dom-if" if="[[model.hasDescription]]" restamp>
+      <div class="docs">
+        <iron-collapse opened="[[docsOpened]]">
+          <marked-element markdown="[[model.description]]">
+            <div class="markdown-html markdown-body"></div>
+          </marked-element>
+        </iron-collapse>
       </div>
     </template>
-    <div class="value-selector">
-      <paper-input class="name-field" label="Field name" error-message="The name is required" required auto-validate value="{{name}}" no-label-float></paper-input>
-      <paper-textarea label="Field value" value="{{value}}" no-label-float></paper-textarea>
-      <span>
-        <paper-icon-button icon="arc:close" on-tap="removeItem" class="delete-icon"></paper-icon-button>
-        <paper-tooltip animation-delay="200">Remove this form parameter</paper-tooltip>
-      </span>
-    </div>
   </template>
   <script>
   Polymer({

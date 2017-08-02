@@ -39,14 +39,20 @@ the License.
       value: {
         notify: true,
         type: String
-      }
+      },
+      /**
+       * A view model. May contain RAML type definition.
+       */
+      model: Object,
+      /**
+       * True to render documentation (if set in model)
+       */
+      docsOpened: Boolean
     },
 
-    /**
-     * Sends an event to the parent form to remove the control from the form.
-     */
-    removeItem: function() {
-      this.fire('remove-multipart-form-item');
+    // Toggles documentation (if available)
+    toggleDocumentation: function() {
+      this.docsOpened = !this.docsOpened;
     }
   };
   window.ArcBehaviors.MultipartFormItemBehavior = [
