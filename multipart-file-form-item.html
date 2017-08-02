@@ -18,6 +18,9 @@ the License.
 <link rel="import" href="../iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="../arc-icons/arc-icons.html">
 <link rel="import" href="../paper-tooltip/paper-tooltip.html">
+<link rel="import" href="../iron-collapse/iron-collapse.html">
+<link rel="import" href="../marked-element/marked-element.html">
+<link rel="import" href="../markdown-styles/markdown-styles.html">
 <link rel="import" href="multipart-form-item-behavior.html">
 <!--
 A file form item.
@@ -25,6 +28,7 @@ A file form item.
 -->
 <dom-module id="multipart-file-form-item">
   <template>
+    <style include="markdown-styles"></style>
     <style>
     :host {
       display: block;
@@ -54,7 +58,7 @@ A file form item.
     }
 
     .file-trigger {
-      color: #FF5722;
+      color: var(--multipart-payload-editor-file-trigger-color, var(--accent-color, #FF5722));
     }
 
     .param-value {
@@ -68,11 +72,11 @@ A file form item.
     .files-counter-message {
       color: rgba(0, 0, 0, 0.74);
       @apply(--layout-flex);
-      @apply(--paper-font-body1);
+      @apply(--arc-font-body1);
     }
 
     .files-list {
-      @apply(--paper-font-body1);
+      @apply(--arc-font-body1);
     }
 
     .files-list span {
@@ -104,13 +108,24 @@ A file form item.
         <template is="dom-if" if="[[hasFile]]">
           <span class="files-counter-message" hidden$="[[!hasFile]]">[[value.name]] ([[value.size]] bytes)</span>
         </template>
-        <span>
-          <paper-icon-button icon="arc:close" on-tap="removeItem" class="delete-icon"></paper-icon-button>
-          <paper-tooltip animation-delay="200">Remove file parameter</paper-tooltip>
-        </span>
+        <template is="dom-if" if="[[model.hasDescription]]">
+          <span>
+            <paper-icon-button class="help-icon" suffix icon="arc:help" hidden$="[[!model.hasDescription]]" on-tap="toggleDocumentation"></paper-icon-button>
+            <paper-tooltip position="left" offset="1" margin-top="1" animation-delay="300">Display documentation</paper-tooltip>
+          </span>
+        </template>
       </div>
+      <template is="dom-if" if="[[model.hasDescription]]" restamp>
+        <div class="docs">
+          <iron-collapse opened="[[docsOpened]]">
+            <marked-element markdown="[[model.description]]">
+              <div class="markdown-html markdown-body"></div>
+            </marked-element>
+          </iron-collapse>
+        </div>
+      </template>
     </div>
-    <input type="file" hidden on-change="_fileObjectChanged" />
+    <input type="file" hidden on-change="_fileObjectChanged" accept$="[[_computeAccept(model)]]"/>
   </template>
   <script>
   Polymer({
@@ -150,6 +165,22 @@ A file form item.
      */
     _fileObjectChanged: function(e) {
       this.set('value', e.target.files[0]);
+    },
+    /**
+     * Computes the `accept`attribute for file input.
+     */
+    _computeAccept: function(model) {
+      if (!model) {
+        return;
+      }
+      if (model.fileTypes && model.fileTypes.length && typeof model.fileTypes[0] === 'string') {
+        return model.fileTypes.join(',');
+      }
+      if (model.fixedFacets) {
+        if (model.fixedFacets.fileTypes && model.fixedFacets.fileTypes.length) {
+          return model.fixedFacets.fileTypes.join(',');
+        }
+      }
     }
   });
   </script>

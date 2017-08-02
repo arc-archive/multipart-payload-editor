@@ -1,13 +1,10 @@
 {
   "name": "multipart-payload-editor",
-  "version": "0.1.3",
+  "version": "0.2.0",
   "license": "Apache-2.0 OR CC-BY-4.0",
   "description": "Multipart payload editor for ARC body editor",
   "devDependencies": {
     "polymer-cli": "^1.2.0"
-  },
-  "engines": {
-    "node": ">=0.10.0"
   },
   "private": false,
   "main": [
@@ -16,7 +13,7 @@
   "author": "The Advanced REST client authors <arc@mulesoft.com>",
   "scripts": {
     "serve": "node_modules/.bin/polymer serve",
-    "lint": "node_modules/.bin/polymer lint multipart-payload-editor.html --rules polymer-1",
+    "lint": "node_modules/.bin/polymer lint multipart-payload-editor.html multipart-text-form-item.html multipart-file-form-item.html --rules polymer-1",
     "test-sauce": "node_modules/.bin/polymer test --plugin sauce --job-name \"multipart-payload-editor:local-test\"",
     "test": "node_modules/.bin/polymer test --plugin local",
     "deps": "npm install --quiet && bower install --quiet",
