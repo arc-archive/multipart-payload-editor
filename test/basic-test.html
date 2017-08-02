@@ -53,7 +53,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         });
 
         test('added item is a file', function() {
-          assert.isTrue(element.model[0].file);
+          assert.isTrue(element.model[0].isFile);
         });
 
         test('value is undefined', function() {
@@ -90,7 +90,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         });
 
         test('added item is a file', function() {
-          assert.isTrue(element.model[1].file);
+          assert.isTrue(element.model[1].isFile);
         });
 
         test('added item has empty name', function() {
@@ -98,7 +98,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         });
 
         test('added item value is undefined', function() {
-          assert.isUndefined(element.model[1].value);
+          assert.notOk(element.model[1].value);
         });
       });
 
@@ -122,8 +122,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           assert.lengthOf(element.model, 2);
         });
 
-        test('added item is a text', function() {
-          assert.isTrue(element.model[1].text);
+        test('added item is not a file', function() {
+          assert.isFalse(element.model[1].isFile);
         });
 
         test('added item has empty name', function() {
@@ -163,7 +163,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           var fd = element.createFormData([{
             name: 'test',
             value: 'test',
-            text: true,
+            isFile: false,
             contentType: 'application/json'
           }]);
           assert.typeOf(fd, 'formdata');
@@ -173,37 +173,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           var fd = element.createFormData([{
             name: 'test',
             value: new Blob(['test'], {type: 'application/json'}),
-            file: true
+            isFile: true
           }]);
           assert.typeOf(fd, 'formdata');
-        });
-      });
-
-      suite('_itemRemoveHandler()', function() {
-        var element;
-
-        setup(function() {
-          element = fixture('basic');
-          TestHelpers.forceXIfStamp(element);
-        });
-
-        test('Removes item from the model', function() {
-          var item = element.$$('multipart-file-form-item');
-          item.removeItem();
-          assert.lengthOf(element.model, 0);
-        });
-
-        test('sets value to undefined', function() {
-          element.set(['model', 0, 'name'], 'test');
-          element.set(['model', 0, 'value'], 'test');
-          element.set(['model', 0, 'file'], false);
-          element.set(['model', 0, 'text'], true);
-          TestHelpers.forceXIfStamp(element);
-          assert.typeOf(element.value, 'formdata', 'FormData is created for value');
-
-          var item = element.$$('multipart-text-form-item');
-          item.removeItem();
-          assert.isUndefined(element.value);
         });
       });
 
@@ -324,7 +296,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
           element.set(['model', 0, 'name'], 'test');
           element.set(['model', 0, 'value'], 'test');
-          assert.isTrue(spy.calledOnce);
+          assert.isTrue(spy.called);
         });
       });
 
@@ -366,7 +338,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           element.setAttribute('opened', true);
           element.set(['model', 0, 'name'], 'test');
           element.set(['model', 0, 'value'], 'test');
-          assert.isTrue(spy.calledOnce);
+          assert.isTrue(spy.called);
         });
 
       });
