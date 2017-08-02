@@ -1,3 +1,21 @@
+<a name="0.2.1"></a>
+## [0.2.1](https://github.com/advanced-rest-client/multipart-payload-editor/compare/0.1.3...0.2.1) (2017-08-02)
+
+
+### Breaking
+
+* Changed UI, API and added RAML types support. ([708638de674f34fd43c3d9ed046a764a4c40f329](https://github.com/advanced-rest-client/multipart-payload-editor/commit/708638de674f34fd43c3d9ed046a764a4c40f329))
+
+### Fix
+
+* Fixing travis script command ([f144055b7ddf5523a27e9fb91d2a2800160d4c65](https://github.com/advanced-rest-client/multipart-payload-editor/commit/f144055b7ddf5523a27e9fb91d2a2800160d4c65))
+
+### Update
+
+* Updated travis configuration. ([70efd418a87840c4e7cba7bc5e807ec69bdc59fb](https://github.com/advanced-rest-client/multipart-payload-editor/commit/70efd418a87840c4e7cba7bc5e807ec69bdc59fb))
+
+
+
 <a name="0.1.3"></a>
 ## [0.1.3](https://github.com/advanced-rest-client/multipart-payload-editor/compare/0.1.2...v0.1.3) (2017-07-11)
 
