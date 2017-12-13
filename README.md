@@ -15,6 +15,16 @@ used in socket connection.
 <multipart-payload-editor value="{{form}}"></multipart-payload-editor>
 ```
 
+## Data model from FormData
+
+The element creates a data model for the form view from FormData object.
+The limitation of this solution is that the information about initial part type
+is lost. In case when the user specified the part as a text part but also added
+part content type it will be recognized as the file part.
+
+Note: this only works in browsers that support full FormData spec which rules
+out any Microsoft product. Y have to include polyfillsfor the FormData. 
+
 ### Styling
 `<multipart-payload-editor>` provides the following custom properties and mixins for styling:
 

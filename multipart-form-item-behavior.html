@@ -31,16 +31,6 @@ the License.
         notify: true
       },
       /**
-       * The value for this element.
-       *
-       * Normally this should be inherited from `Polymer.IronFormElementBehavior`
-       * but this time polymer linter says that this propery is not defined...
-       */
-      value: {
-        notify: true,
-        type: String
-      },
-      /**
        * A view model. May contain RAML type definition.
        */
       model: Object,
@@ -55,6 +45,7 @@ the License.
       this.docsOpened = !this.docsOpened;
     }
   };
+  /* @polymerBehavior ArcBehaviors.MultipartFormItemBehavior */
   window.ArcBehaviors.MultipartFormItemBehavior = [
     Polymer.IronFormElementBehavior,
     Polymer.IronValidatableBehavior,

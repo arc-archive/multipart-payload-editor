@@ -1,3 +1,19 @@
+<a name="0.2.3"></a>
+## [0.2.3](https://github.com/advanced-rest-client/multipart-payload-editor/compare/0.2.1...0.2.3) (2017-12-13)
+
+
+### Fix
+
+* fixed failing tests on Edge. ([c1f6fd4f472e3cf82da64fc2a3c872b8d93466b7](https://github.com/advanced-rest-client/multipart-payload-editor/commit/c1f6fd4f472e3cf82da64fc2a3c872b8d93466b7))
+* Fixed tests on IE11 ([758019c0d80270566e1577b51895f11348e86823](https://github.com/advanced-rest-client/multipart-payload-editor/commit/758019c0d80270566e1577b51895f11348e86823))
+* Fixing polymer linter annotations. ([4906b2eabecd7504e2434c00cf6c24fa34a7c082](https://github.com/advanced-rest-client/multipart-payload-editor/commit/4906b2eabecd7504e2434c00cf6c24fa34a7c082))
+
+### Update
+
+* Added creation of data model from FormData ([352dc9c7e702398bdd47390f46152b98a13ed6cf](https://github.com/advanced-rest-client/multipart-payload-editor/commit/352dc9c7e702398bdd47390f46152b98a13ed6cf))
+
+
+
 <a name="0.2.2"></a>
 ## [0.2.2](https://github.com/advanced-rest-client/multipart-payload-editor/compare/0.2.1...0.2.2) (2017-08-02)
 
