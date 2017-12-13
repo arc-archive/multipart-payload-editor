@@ -1,3 +1,17 @@
+<a name="0.2.4"></a>
+## [0.2.4](https://github.com/advanced-rest-client/multipart-payload-editor/compare/0.2.3...0.2.4) (2017-12-13)
+
+
+### Docs
+
+* Updated documentation for element ([be70e9fca71a31edac22b165f7287e53da1f27be](https://github.com/advanced-rest-client/multipart-payload-editor/commit/be70e9fca71a31edac22b165f7287e53da1f27be))
+
+### Fix
+
+* Fixed error throwning by the element when invalid type is passed. ([efa157a89b49e3a3da46c8f7b7cc87b5423faf78](https://github.com/advanced-rest-client/multipart-payload-editor/commit/efa157a89b49e3a3da46c8f7b7cc87b5423faf78))
+
+
+
 <a name="0.2.3"></a>
 ## [0.2.3](https://github.com/advanced-rest-client/multipart-payload-editor/compare/0.2.1...0.2.3) (2017-12-13)
 
