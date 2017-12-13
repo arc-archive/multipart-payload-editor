@@ -310,6 +310,10 @@ Custom property | Description | Default
       }
       var model = [];
       if (this.model) {
+        if (!this._modelAndValueMatch(this.model, value)) {
+          this._restoreFormData(value);
+          return;
+        }
         this.model.forEach(function(item) {
           model.push({
             name: item.name,
@@ -318,11 +322,81 @@ Custom property | Description | Default
             isFile: item.isFile
           });
         });
+      } else if (value) {
+        this._restoreFormData(value);
+        return;
       }
       this.fire('payload-value-changed', {
         value: value,
         model: model
       });
+    },
+    /**
+     * Transforms FormData into the data model.
+     * Sets new model data.
+     *
+     * @param {FormData} data Form data to be restored.
+     */
+    _restoreFormData: function(data) {
+      var it = data.entries();
+      var model = [];
+      while (true) {
+        var item = it.next();
+        if (item.done) {
+          break;
+        }
+        var part = item.value;
+        var modelItem = {
+          name: part[0],
+          value: part[1]
+        };
+
+        if (typeof part[1] === 'string') {
+          modelItem.type = 'text';
+        } else {
+          modelItem.type = 'file';
+        }
+        modelItem = this._createModelObject(modelItem, {});
+        modelItem.isFile = modelItem.type === 'file' ? true : false;
+        if (modelItem.isFile) {
+          modelItem.value = part[1];
+        }
+        model.push(modelItem);
+      }
+      this.set('model', model);
+    },
+    /**
+     * Tests if current model and FormData object represent the same form data.
+     *
+     * @param {Array} model Model to test
+     * @param {FormData} value Form data with values
+     * @return {Boolean} True if model represents data in FormData object
+     */
+    _modelAndValueMatch: function(model, value) {
+      if ((!model || !model.length) && value) {
+        return false;
+      }
+      if (!value) {
+        return true;
+      }
+      var it = value.keys();
+      var modelSize = model.length;
+      while (true) {
+        var item = it.next();
+        if (item.done) {
+          return true;
+        }
+        var fasItem = false;
+        for (var i = 0; i < modelSize; i++) {
+          if (model[i].name === item.value) {
+            fasItem = true;
+            break;
+          }
+        }
+        if (!fasItem) {
+          return false;
+        }
+      }
     },
     // Generates a message and displays highlighted content of the message.
     _previewOpenedChanged: function(opened) {

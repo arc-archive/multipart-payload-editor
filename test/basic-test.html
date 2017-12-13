@@ -340,7 +340,39 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           element.set(['model', 0, 'value'], 'test');
           assert.isTrue(spy.called);
         });
+      });
+    });
 
+    suite('Restore form data', function() {
+      var fd;
+      var element;
+      setup(function() {
+        fd = new FormData();
+        fd.append('text', 'test');
+        fd.append('file', new Blob(['test', {type: 'plain/text'}]));
+        element = fixture('basic');
+      });
+
+      test('Creates model from FormData', function() {
+        element.value = fd;
+        assert.typeOf(element.model, 'array');
+        assert.lengthOf(element.model, 2);
+      });
+
+      test('Restores text data', function() {
+        element.value = fd;
+        var model = element.model[0];
+        assert.isFalse(model.isFile);
+        assert.equal(model.name, 'text');
+        assert.equal(model.value, 'test');
+      });
+
+      test('Restores file data', function() {
+        element.value = fd;
+        var model = element.model[1];
+        assert.isTrue(model.isFile);
+        assert.equal(model.name, 'file');
+        assert.isTrue(model.value instanceof Blob);
       });
     });
     </script>
