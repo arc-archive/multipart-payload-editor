@@ -354,12 +354,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       });
 
       test('Creates model from FormData', function() {
+        if (!element.hasFormDataSupport) {
+          return;
+        }
         element.value = fd;
         assert.typeOf(element.model, 'array');
         assert.lengthOf(element.model, 2);
       });
 
       test('Restores text data', function() {
+        if (!element.hasFormDataSupport) {
+          return;
+        }
         element.value = fd;
         var model = element.model[0];
         assert.isFalse(model.isFile);
@@ -368,6 +374,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       });
 
       test('Restores file data', function() {
+        if (!element.hasFormDataSupport) {
+          return;
+        }
         element.value = fd;
         var model = element.model[1];
         assert.isTrue(model.isFile);

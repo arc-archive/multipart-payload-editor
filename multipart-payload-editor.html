@@ -44,6 +44,16 @@ used in socket connection.
 <multipart-payload-editor value="{{form}}"></multipart-payload-editor>
 ```
 
+## Data model from FormData
+
+The element creates a data model for the form view from FormData object.
+The limitation of this solution is that the information about initial part type
+is lost. In case when the user specified the part as a text part but also added
+part content type it will be recognized as the file part.
+
+Note: this only works in browsers that support full FormData spec which rules
+out any Microsoft product. Y have to include polyfillsfor the FormData. 
+
 ### Styling
 `<multipart-payload-editor>` provides the following custom properties and mixins for styling:
 
@@ -338,6 +348,9 @@ Custom property | Description | Default
      * @param {FormData} data Form data to be restored.
      */
     _restoreFormData: function(data) {
+      if (!this.hasFormDataSupport) {
+        return;
+      }
       var it = data.entries();
       var model = [];
       while (true) {
@@ -350,7 +363,6 @@ Custom property | Description | Default
           name: part[0],
           value: part[1]
         };
-
         if (typeof part[1] === 'string') {
           modelItem.type = 'text';
         } else {
@@ -373,6 +385,9 @@ Custom property | Description | Default
      * @return {Boolean} True if model represents data in FormData object
      */
     _modelAndValueMatch: function(model, value) {
+      if (!this.hasFormDataSupport) {
+        return true;
+      }
       if ((!model || !model.length) && value) {
         return false;
       }
