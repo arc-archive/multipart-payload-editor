@@ -349,7 +349,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       setup(function() {
         fd = new FormData();
         fd.append('text', 'test');
-        fd.append('file', new Blob(['test', {type: 'plain/text'}]));
+        try {
+          fd.append('file', new Blob(['test', {type: 'plain/text'}]));
+        } catch (e) {}
         element = fixture('basic');
       });
 
