@@ -186,7 +186,7 @@ Custom property | Description | Default
               <multipart-file-form-item name="{{item.name}}" value="{{item.value}}" model="[[item]]" required auto-validate></multipart-file-form-item>
             </template>
             <template is="dom-if" if="[[!item.isFile]]">
-              <multipart-text-form-item has-form-data="[[hasFormDataSupport]]" name="{{item.name}}" value="{{item.value}}" content-type="{{item.contentType}}"  model="[[item]]" required auto-validate></multipart-text-form-item>
+              <multipart-text-form-item has-form-data="[[hasFormDataSupport]]" name="{{item.name}}" value="{{item.value}}" type="{{item.contentType}}"  model="[[item]]" required auto-validate></multipart-text-form-item>
             </template>
             <span class="delete-action">
               <paper-icon-button icon="arc:close" on-tap="_removeItem" class="delete-icon"></paper-icon-button>
