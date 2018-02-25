@@ -350,7 +350,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         fd = new FormData();
         fd.append('text', 'test');
         try {
-          fd.append('file', new Blob(['test', {type: 'plain/text'}]));
+          fd.append('file', new Blob(['test'], {type: 'plain/text'}));
+          fd.append('text-w-ct', new Blob(['test'], {type: 'plain/text'}));
         } catch (e) {}
         element = fixture('basic');
       });
@@ -359,31 +360,54 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         if (!element.hasFormDataSupport) {
           return;
         }
-        element.value = fd;
-        assert.typeOf(element.model, 'array');
-        assert.lengthOf(element.model, 2);
+        return element._restoreFormData(fd)
+        .then(function() {
+          assert.typeOf(element.model, 'array');
+          assert.lengthOf(element.model, 3);
+        });
       });
 
       test('Restores text data', function() {
         if (!element.hasFormDataSupport) {
           return;
         }
-        element.value = fd;
-        var model = element.model[0];
-        assert.isFalse(model.isFile);
-        assert.equal(model.name, 'text');
-        assert.equal(model.value, 'test');
+        return element._restoreFormData(fd)
+        .then(function() {
+          var model = element.model[0];
+          assert.isFalse(model.isFile);
+          assert.equal(model.name, 'text');
+          assert.equal(model.value, 'test');
+        });
       });
 
       test('Restores file data', function() {
         if (!element.hasFormDataSupport) {
           return;
         }
-        element.value = fd;
-        var model = element.model[1];
-        assert.isTrue(model.isFile);
-        assert.equal(model.name, 'file');
-        assert.isTrue(model.value instanceof Blob);
+        return element._restoreFormData(fd)
+        .then(function() {
+          var model = element.model[1];
+          assert.isTrue(model.isFile);
+          assert.equal(model.name, 'file');
+          assert.isTrue(model.value instanceof Blob);
+        });
+      });
+
+      test('Restores text from ARC meta', function() {
+        if (!element.hasFormDataSupport) {
+          return;
+        }
+        fd._arcMeta = {
+          textParts: ['text-w-ct']
+        };
+        return element._restoreFormData(fd)
+        .then(function() {
+          var model = element.model[2];
+          assert.isFalse(model.isFile);
+          assert.equal(model.name, 'text-w-ct');
+          assert.equal(model.value, 'test');
+          assert.equal(model.type, 'plain/text');
+        });
       });
     });
     </script>
