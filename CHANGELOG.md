@@ -1,3 +1,17 @@
+<a name="0.2.6"></a>
+## [0.2.6](https://github.com/advanced-rest-client/multipart-payload-editor/compare/0.2.5...0.2.6) (2018-02-25)
+
+
+### Breaking
+
+* Changed property name to not confuse other elements when it changes ([e36b1a6ca46bbd5ce9570f29758253680c333c56](https://github.com/advanced-rest-client/multipart-payload-editor/commit/e36b1a6ca46bbd5ce9570f29758253680c333c56))
+
+### Update
+
+* Added a property to restore text part with content type. ([96fd582574c949efc2719c6cef5b1f0e3e61b273](https://github.com/advanced-rest-client/multipart-payload-editor/commit/96fd582574c949efc2719c6cef5b1f0e3e61b273))
+
+
+
 <a name="0.2.5"></a>
 ## [0.2.5](https://github.com/advanced-rest-client/multipart-payload-editor/compare/0.2.4...0.2.5) (2017-12-13)
 

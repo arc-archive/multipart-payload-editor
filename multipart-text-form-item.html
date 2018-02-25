@@ -100,7 +100,7 @@ a content type selector for the input field.
     <div class="multipart-item">
       <template is="dom-if" if="[[hasFormData]]">
         <div class="mime-selector">
-          <paper-input label="Content type (Optional)" value="{{contentType}}" no-label-float></paper-input>
+          <paper-input label="Content type (Optional)" value="{{type}}" no-label-float></paper-input>
           <paper-autocomplete target="[[_mimeInput]]" source="[[suggestions]]" open-on-focus></paper-autocomplete>
         </div>
       </template>
@@ -139,7 +139,7 @@ a content type selector for the input field.
         type: HTMLElement
       },
       // A content type of the form field to be presented in the Multipart request.
-      contentType: {
+      type: {
         type: String,
         notify: true
       },
