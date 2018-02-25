@@ -172,12 +172,10 @@ Custom property | Description | Default
         <paper-icon-button id="previewIcon" icon="[[_computeToggleIcon(previewOpened)]]" class="content-action-button" toggles active="{{previewOpened}}" disabled="[[generatingPreview]]"></paper-icon-button>
         <paper-icon-button id="copyIcon" icon="arc:content-copy" class="content-action-button" on-tap="_copyToClipboard" disabled="[[generatingPreview]]" hidden$="[[!previewOpened]]"></paper-icon-button>
         <paper-spinner alt="Loading preview" active="[[generatingPreview]]"></paper-spinner>
-
         <paper-tooltip for="previewIcon" animation-delay="200">Toggles generated payload message preview</paper-tooltip>
         <paper-tooltip for="copyIcon" animation-delay="200">Copy payload message</paper-tooltip>
       </div>
     </template>
-
     <section hidden$="[[previewOpened]]">
       <form is="iron-form" id="form" enctype="multipart/form-data" method="post">
         <template is="dom-repeat" id="list" items="{{model}}" observe="value">
@@ -186,7 +184,7 @@ Custom property | Description | Default
               <multipart-file-form-item name="{{item.name}}" value="{{item.value}}" model="[[item]]" required auto-validate></multipart-file-form-item>
             </template>
             <template is="dom-if" if="[[!item.isFile]]">
-              <multipart-text-form-item has-form-data="[[hasFormDataSupport]]" name="{{item.name}}" value="{{item.value}}" content-type="{{item.contentType}}"  model="[[item]]" required auto-validate></multipart-text-form-item>
+              <multipart-text-form-item has-form-data="[[hasFormDataSupport]]" name="{{item.name}}" value="{{item.value}}" type="{{item.contentType}}"  model="[[item]]" required auto-validate></multipart-text-form-item>
             </template>
             <span class="delete-action">
               <paper-icon-button icon="arc:close" on-tap="_removeItem" class="delete-icon"></paper-icon-button>
@@ -351,32 +349,84 @@ Custom property | Description | Default
       if (!this.hasFormDataSupport) {
         return;
       }
+      var textParts;
+      if (data._arcMeta && data._arcMeta.textParts) {
+        textParts = data._arcMeta.textParts;
+      }
       var it = data.entries();
-      var model = [];
-      while (true) {
-        var item = it.next();
-        if (item.done) {
-          break;
-        }
-        var part = item.value;
-        var modelItem = {
-          name: part[0],
-          value: part[1]
-        };
-        if (typeof part[1] === 'string') {
+      return this._modelForParts(it, textParts)
+      .then(function(model) {
+        this._cancelModelChange = true;
+        this.set('model', model);
+        this._cancelModelChange = false;
+      }.bind(this));
+    },
+
+    _modelForParts: function(entries, textParts, result) {
+      /* global Promise */
+      result = result || [];
+      var item = entries.next();
+      if (item.done) {
+        return Promise.resolve(result);
+      }
+      var part = item.value;
+      var modelItem = {
+        name: part[0]
+      };
+      var restoreBlobValue = false;
+      if (typeof part[1] === 'string') {
+        modelItem.type = 'text';
+      } else {
+        if (textParts && textParts.indexOf(modelItem.name) !== -1) {
           modelItem.type = 'text';
+          restoreBlobValue = true;
         } else {
           modelItem.type = 'file';
         }
+      }
+      var promise;
+      if (restoreBlobValue) {
+        promise = this._blobToString(part[1]);
+      } else {
+        promise = Promise.resolve({
+          result: part[1]
+        });
+      }
+      return promise
+      .then(function(value) {
+        modelItem.value = value.result;
         modelItem = this._createModelObject(modelItem, {});
         modelItem.isFile = modelItem.type === 'file' ? true : false;
         if (modelItem.isFile) {
           modelItem.value = part[1];
         }
-        model.push(modelItem);
-      }
-      this.set('model', model);
+        if (restoreBlobValue) {
+          modelItem.type = value.type;
+        }
+        result.push(modelItem);
+        return this._modelForParts(entries, textParts, result);
+      }.bind(this));
     },
+
+    _blobToString: function(blob) {
+      return new Promise(function(resolve) {
+        var reader = new FileReader();
+        reader.addEventListener('loadend', function(e) {
+          resolve({
+            result: e.target.result,
+            type: blob.type
+          });
+        });
+        reader.addEventListener('error', function() {
+          resolve({
+            result: 'Unable to restore part value',
+            type: ''
+          });
+        });
+        reader.readAsText(blob);
+      });
+    },
+
     /**
      * Tests if current model and FormData object represent the same form data.
      *
@@ -456,7 +506,7 @@ Custom property | Description | Default
     },
     // Called when the model chage. Regenerates the FormData object.
     _modelChanged: function(record, _isOpened) {
-      if (!_isOpened) {
+      if (!_isOpened || this._cancelModelChange) {
         return;
       }
       if (!record || !record.path) {
@@ -508,6 +558,13 @@ Custom property | Description | Default
           if (item.contentType) {
             var blob = new Blob([item.value], {type: item.contentType});
             fd.append(item.name, blob);
+            if (!fd._arcMeta) {
+              fd._arcMeta = {};
+            }
+            if (!fd._arcMeta.textParts) {
+              fd._arcMeta.textParts = [];
+            }
+            fd._arcMeta.textParts.push(item.name);
           } else {
             fd.append(item.name, item.value);
           }
