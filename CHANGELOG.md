@@ -1,3 +1,13 @@
+<a name="0.2.8"></a>
+## [0.2.8](https://github.com/advanced-rest-client/multipart-payload-editor/compare/0.2.7...0.2.8) (2018-02-25)
+
+
+### Fix
+
+* Fixed contentType property name ([e40039c7d30256a001e2594d9db119d2e5e6f1ac](https://github.com/advanced-rest-client/multipart-payload-editor/commit/e40039c7d30256a001e2594d9db119d2e5e6f1ac))
+
+
+
 <a name="0.2.7"></a>
 ## [0.2.7](https://github.com/advanced-rest-client/multipart-payload-editor/compare/0.2.6...0.2.7) (2018-02-25)
 
