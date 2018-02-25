@@ -401,7 +401,7 @@ Custom property | Description | Default
           modelItem.value = part[1];
         }
         if (restoreBlobValue) {
-          modelItem.type = value.type;
+          modelItem.contentType = value.type;
         }
         result.push(modelItem);
         return this._modelForParts(entries, textParts, result);
