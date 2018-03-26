@@ -1,3 +1,9 @@
+<a name="1.0.0"></a>
+# [1.0.0](https://github.com/advanced-rest-client/multipart-payload-editor/compare/0.2.8...1.0.0) (2018-03-26)
+
+
+
+
 <a name="0.2.9"></a>
 ## [0.2.9](https://github.com/advanced-rest-client/multipart-payload-editor/compare/0.2.8...0.2.9) (2018-02-26)
 
