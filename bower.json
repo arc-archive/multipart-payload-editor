@@ -53,7 +53,8 @@
     "paper-listbox": "PolymerElements/paper-listbox#^2.1.0",
     "paper-item": "PolymerElements/paper-item#^2.1.0",
     "fetch-polyfill": "advanced-rest-client/fetch-polyfill#^0.1.1",
-    "paper-checkbox": "PolymerElements/paper-checkbox#^2.0.2"
+    "paper-checkbox": "PolymerElements/paper-checkbox#^2.0.2",
+    "web-animations-js": "web-animations/web-animations-js#^2.3.1"
   },
   "ignore": [
     "**/.*",
