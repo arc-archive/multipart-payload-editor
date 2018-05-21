@@ -1,11 +1,10 @@
 {
-  "name": "@api-components/multipart-payload-editor",
-  "version": "2.0.0-preview",
+  "name": "@advanced-rest-client/multipart-payload-editor",
+  "version": "2.0.0",
   "license": "Apache-2.0",
   "description": "Multipart payload editor for ARC body editor",
   "devDependencies": {
-    "@polymer/gen-typescript-declarations": "^1.1.1",
-    "bower": "^1.8.0"
+    "@polymer/gen-typescript-declarations": "^1.1.1"
   },
   "authors": [
     "Pawel Psztyc",
