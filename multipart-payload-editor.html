@@ -1,6 +1,6 @@
 <!--
 @license
-Copyright 2017 The Advanced REST client authors <arc@mulesoft.com>
+Copyright 2018 The Advanced REST client authors <arc@mulesoft.com>
 Licensed under the Apache License, Version 2.0 (the "License"); you may not
 use this file except in compliance with the License. You may obtain a copy of
 the License at
@@ -11,82 +11,31 @@ WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 License for the specific language governing permissions and limitations under
 the License.
 -->
-<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../polymer/polymer-element.html">
+<link rel="import" href="../polymer/lib/elements/dom-if.html">
+<link rel="import" href="../polymer/lib/elements/dom-repeat.html">
 <link rel="import" href="../arc-icons/arc-icons.html">
 <link rel="import" href="../iron-form/iron-form.html">
-<link rel="import" href="../iron-pages/iron-pages.html">
 <link rel="import" href="../iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="../paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../paper-spinner/paper-spinner.html">
-<link rel="import" href="../paper-tooltip/paper-tooltip.html">
 <link rel="import" href="../paper-toast/paper-toast.html">
-<link rel="import" href="../request-payload-editor-behavior/request-payload-editor-behavior.html">
-<link rel="import" href="../raml-type-form-behavior/raml-type-form-behavior.html">
+<link rel="import" href="../api-form-mixin/api-form-mixin.html">
+<link rel="import" href="../api-form-mixin/api-form-styles.html">
 <link rel="import" href="../multipart-payload-transformer/multipart-payload-transformer.html">
+<link rel="import" href="../iron-validatable-behavior/iron-validatable-behavior.html">
 <link rel="import" href="../clipboard-copy/clipboard-copy.html">
-<link rel="import" href="../arc-polyfills/arc-polyfills.html">
 <link rel="import" href="../prism-element/prism-highlighter.html">
 <link rel="import" href="../prism-element/prism-theme-default.html">
 <link rel="import" href="multipart-text-form-item.html">
 <link rel="import" href="multipart-file-form-item.html">
 <script src="../prism/components/prism-http.min.js"></script>
-<!--
-Multipart payload editor for ARC/API Console body editor.
-
-On supported browsers (full support for FormData, Iterator and ArrayBuffer) it will render a
-UI controls to generate payload message preview.
-
-It produces a FormData object that can be used in XHR / Fetch or transformed to ArrayBuffer to be
-used in socket connection.
-
-### Example
-```
-<multipart-payload-editor value="{{form}}"></multipart-payload-editor>
-```
-
-## Data model from FormData
-
-The element creates a data model for the form view from FormData object.
-The limitation of this solution is that the information about initial part type
-is lost. In case when the user specified the part as a text part but also added
-part content type it will be recognized as the file part.
-
-Note: this only works in browsers that support full FormData spec which rules
-out any Microsoft product. You have to include polyfills for the FormData.
-
-### Styling
-`<multipart-payload-editor>` provides the following custom properties and mixins for styling:
-
-Custom property | Description | Default
-----------------|-------------|----------
-`--multipart-payload-editor` | Mixin applied to the element | `{}`
-`--multipart-payload-editor-code-preview` | Mixin applied to a code preview element | `{}`
-`--view-action-bar` | Theme mixin, applied to the content action bar | `{}`
-`--multipart-payload-editor-action-bar` | Mixin applied to the content action bar | `{}`
-`--body-editor-panel-button-active-background-color` | Background color of the active content action button | `#e0e0e0`
-`--body-editor-panel-button-active` | Mixin applied to active content action button | `{}`
-`--content-action-icon-color` | Color of the content action icon | `rgba(0, 0, 0, 0.74)`
-`--content-action-icon-color-hover` | Color of the content action icon when hovered | `--accent-color` or `rgba(0, 0, 0, 0.74)`
-`--multipart-payload-editor-action-button` | Mixin applied to the "add action" button | `{}`
-`--multipart-payload-editor-action-button-hover` | Mixin applied to the "add action" button when hovering | `{}`
-`--multipart-payload-editor-action-button-color` | Color of the action button. | `--secondary-button-color` or `--accent-color`
-`--multipart-payload-editor-action-button-color-hover` | Color of the action button when hovered | `--secondary-button-color` or `--accent-color`
-`--multipart-payload-editor-action-button-background` | Background of the action button | `--secondary-button-background` or `#fff`
-`--multipart-payload-editor-action-button-background-hover` | Background of the action button when hovered | `--secondary-button-background` or `#fff`
-`--inline-documentation-color` | Color of the description text from a RAML type. | `rgba(0, 0, 0, 0.87)`
-`--from-row-action-icon-color` | Color of the icon buttons next to the input fields | `--icon-button-color` or `rgba(0, 0, 0, 0.74)`
-`--from-row-action-icon-color-hover` | Color of the icon buttons next to the input fields when hovering | `--accent-color` or `rgba(0, 0, 0, 0.74)`,
-`--multipart-payload-editor-file-trigger-color` | Color of the file dialog trigger button. | `--accent-color` or `#FF5722`
-
-@group UI Elements
-@element multipart-payload-editor
-@demo demo/index.html
--->
 <dom-module id="multipart-payload-editor">
   <template strip-whitespace>
     <style include="prism-theme-default"></style>
+    <style include="api-form-styles"></style>
     <style>
-     :host {
+    :host {
       display: block;
       @apply --multipart-payload-editor;
     }
@@ -107,15 +56,6 @@ Custom property | Description | Default
 
     .form-item:not([data-file]) .delete-action {
       margin-top: 42px;
-    }
-
-    .delete-icon {
-      color: var(--from-row-action-icon-color, var(--icon-button-color, rgba(0, 0, 0, 0.74)));
-      transition: color 0.2s linear;
-    }
-
-    .delete-icon:hover {
-      color: var(--from-row-action-icon-color-hover, var(--accent-color, rgba(0, 0, 0, 0.74)));
     }
 
     multipart-text-form-item,
@@ -143,237 +83,239 @@ Custom property | Description | Default
       border-radius: 50%;
       @apply --body-editor-panel-button-active;
     }
-
-    .content-action-button {
-      color: var(--content-action-icon-color, rgba(0, 0, 0, 0.74));
-      transition: color 0.2s linear;
-    }
-
-    .content-action-button:hover {
-      color: var(--content-action-icon-color-hover, var(--accent-color, rgba(0, 0, 0, 0.74)));
-    }
-
-    .action-button {
-      color: var(--multipart-payload-editor-action-button-color, var(--secondary-button-color, --accent-color));
-      background: var(--multipart-payload-editor-action-button-background, var(--secondary-button-background, #fff));
-      @apply --secondary-button;
-      @apply --multipart-payload-editor-action-button;
-    }
-
-    .action-button:hover {
-      color: var(--multipart-payload-editor-action-button-color-hover, var(--secondary-button-color, --accent-color));
-      background: var(--rmultipart-payload-editor-action-button-background-hover, var(--secondary-button-background, #fff));
-      @apply --secondary-button-hover;
-      @apply --multipart-payload-editor-action-button-hover;
-    }
     </style>
     <template is="dom-if" if="[[hasFormDataSupport]]">
       <div class="editor-actions">
-        <paper-icon-button id="previewIcon" icon="[[_computeToggleIcon(previewOpened)]]" class="content-action-button" toggles active="{{previewOpened}}" disabled="[[generatingPreview]]"></paper-icon-button>
-        <paper-icon-button id="copyIcon" icon="arc:content-copy" class="content-action-button" on-tap="_copyToClipboard" disabled="[[generatingPreview]]" hidden$="[[!previewOpened]]"></paper-icon-button>
+        <paper-icon-button id="previewIcon" icon="[[_computeToggleIcon(previewOpened)]]" class="action-icon" toggles active="{{previewOpened}}" disabled="[[generatingPreview]]" title="Toggles generated payload message preview"></paper-icon-button>
+        <paper-icon-button id="copyIcon" icon="arc:content-copy" class="action-icon" on-tap="_copyToClipboard" disabled="[[generatingPreview]]" hidden$="[[!previewOpened]]" title="Copy payload message"></paper-icon-button>
         <paper-spinner alt="Loading preview" active="[[generatingPreview]]"></paper-spinner>
-        <paper-tooltip for="previewIcon" animation-delay="200">Toggles generated payload message preview</paper-tooltip>
-        <paper-tooltip for="copyIcon" animation-delay="200">Copy payload message</paper-tooltip>
       </div>
     </template>
     <section hidden$="[[previewOpened]]">
-      <form is="iron-form" id="form" enctype="multipart/form-data" method="post">
-        <template is="dom-repeat" id="list" items="{{model}}" observe="value">
-          <div class="form-item" data-file$="[[item.isFile]]">
-            <template is="dom-if" if="[[item.isFile]]">
-              <multipart-file-form-item name="{{item.name}}" value="{{item.value}}" model="[[item]]" required auto-validate></multipart-file-form-item>
-            </template>
-            <template is="dom-if" if="[[!item.isFile]]">
-              <multipart-text-form-item has-form-data="[[hasFormDataSupport]]" name="{{item.name}}" value="{{item.value}}" type="{{item.contentType}}"  model="[[item]]" required auto-validate></multipart-text-form-item>
-            </template>
-            <span class="delete-action">
-              <paper-icon-button icon="arc:close" on-tap="_removeItem" class="delete-icon"></paper-icon-button>
-              <paper-tooltip animation-delay="200">Remove this form parameter</paper-tooltip>
-            </span>
-          </div>
-        </template>
-      </form>
+      <iron-form>
+        <form enctype="multipart/form-data" method="post">
+          <template is="dom-repeat" id="list" items="{{model}}" observe="value">
+            <div class="form-item" data-file$="[[item.schema.isFile]]">
+              <template is="dom-if" if="[[item.schema.isFile]]">
+                <multipart-file-form-item name="{{item.name}}" value="{{item.value}}" model="[[item]]" required auto-validate></multipart-file-form-item>
+              </template>
+              <template is="dom-if" if="[[!item.schema.isFile]]">
+                <multipart-text-form-item has-form-data="[[hasFormDataSupport]]" name="{{item.name}}" value="{{item.value}}" type="{{item.contentType}}"  model="[[item]]" required auto-validate></multipart-text-form-item>
+              </template>
+              <span class="delete-action">
+                <paper-icon-button title="Remove parameter" class="action-icon delete-icon" icon="arc:remove-circle-outline" on-tap="_removeCustom"></paper-icon-button>
+              </span>
+            </div>
+          </template>
+        </form>
+      </iron-form>
       <div class="add-actions">
         <paper-button on-tap="addFile" class="action-button">Add file part</paper-button><paper-button on-tap="addText" class="action-button">Add text part</paper-button>
       </div>
     </section>
-
     <section hidden$="[[!previewOpened]]">
       <code></code>
     </section>
-
     <prism-highlighter></prism-highlighter>
     <multipart-payload-transformer></multipart-payload-transformer>
     <clipboard-copy content="[[messagePreview]]"></clipboard-copy>
     <paper-toast horizontal-align="right"></paper-toast>
   </template>
   <script>
-  Polymer({
-    is: 'multipart-payload-editor',
-
-    behaviors: [
-      ArcBehaviors.RamlTypeFormBehavior,
-      ArcBehaviors.RequestPayloadEditorBehavior
-    ],
-
-    properties: {
-      /**
-       * Map of current form values.
-       */
-      model: Array,
-      // Value of this form
-      value: {
-        type: Object,
-        notify: true
-      },
-      /**
-       * RAML data type to compute model from.
-       */
-      ramlType: Object,
-      // True if the browser has native FormData support
-      hasFormDataSupport: {
-        type: Boolean,
-        value: function() {
-          try {
-            var fd = new FormData();
-            fd.append('test', new Blob(['.'], {type: 'image/jpg'}), 'test.jpg');
-            return ('entries' in fd);
-          } catch (e) {
-            return false;
+  /**
+   * Multipart payload editor for ARC/API Console body editor.
+   *
+   * On supported browsers (full support for FormData, Iterator and ArrayBuffer) it will render a
+   * UI controls to generate payload message preview.
+   *
+   * It produces a FormData object that can be used in XHR / Fetch or transformed to ArrayBuffer to be
+   * used in socket connection.
+   *
+   * ### Example
+   * ```html
+   * <multipart-payload-editor value="{{form}}"></multipart-payload-editor>
+   * ```
+   *
+   * ## Data model from FormData
+   *
+   * The element creates a data model for the form view from FormData object.
+   * The limitation of this solution is that the information about initial part type
+   * is lost. In case when the user specified the part as a text part but also added
+   * part content type it will be recognized as the file part.
+   *
+   * Note: this only works in browsers that support full FormData spec which rules
+   * out any Microsoft product. **You have to include polyfills for the FormData.**
+   *
+   * ### Styling
+   *
+   * `<multipart-payload-editor>` provides the following custom properties and mixins for styling:
+   *
+   * Custom property | Description | Default
+   * ----------------|-------------|----------
+   * `--multipart-payload-editor` | Mixin applied to the element | `{}`
+   * `--multipart-payload-editor-code-preview` | Mixin applied to a code preview element | `{}`
+   * `--view-action-bar` | Theme mixin, applied to the content action bar | `{}`
+   * `--multipart-payload-editor-action-bar` | Mixin applied to the content action bar | `{}`
+   * `--body-editor-panel-button-active-background-color` | Background color of the active content action button | `#e0e0e0`
+   * `--body-editor-panel-button-active` | Mixin applied to active content action button | `{}`
+   * `--content-action-icon-color` | Color of the content action icon | `rgba(0, 0, 0, 0.74)`
+   * `--content-action-icon-color-hover` | Color of the content action icon when hovered | `--accent-color` or `rgba(0, 0, 0, 0.74)`
+   * `--inline-documentation-color` | Color of the description text from a RAML type. | `rgba(0, 0, 0, 0.87)`
+   * `--from-row-action-icon-color` | Color of the icon buttons next to the input fields | `--icon-button-color` or `rgba(0, 0, 0, 0.74)`
+   * `--from-row-action-icon-color-hover` | Color of the icon buttons next to the input fields when hovering | `--accent-color` or `rgba(0, 0, 0, 0.74)`,
+   * `--multipart-payload-editor-file-trigger-color` | Color of the file dialog trigger button. | `--accent-color` or `#FF5722`
+   *
+   * This element also inherits styles from
+   * `advanced-rest-client/api-form-mixin/api-form-styles.html` element to
+   * style form controls.
+   *
+   * @customElement
+   * @polymer
+   * @demo demo/simple.html Simple usage
+   * @demo demo/raml.html With AMF model from RAML file
+   * @appliesMixin Polymer.IronValidatableBehavior
+   * @appliesMixin ArcBehaviors.ApiFormMixin
+   * @memberof ApiComponents
+   */
+  class MultipartPayloadEditor extends Polymer.mixinBehaviors([Polymer.IronValidatableBehavior], ArcBehaviors.ApiFormMixin(Polymer.Element)) {
+    static get is() { return 'multipart-payload-editor'; }
+    static get properties() {
+      return {
+        /**
+         * Value of this form
+         *
+         * @type {FormData}
+         */
+        value: {
+          type: Object,
+          notify: true,
+          observer: '_valueChanged'
+        },
+        /**
+         * True if the browser has native FormData support.
+         */
+        hasFormDataSupport: {
+          type: Boolean,
+          value: function() {
+            try {
+              const fd = new FormData();
+              fd.append('test', new Blob(['.'], {type: 'image/jpg'}), 'test.jpg');
+              return ('entries' in fd);
+            } catch (e) {
+              return false;
+            }
           }
-        }
-      },
-      // true if the message preview is opened
-      previewOpened: {
-        type: Boolean,
-        value: false
-      },
-      // true if the transformer is generating the message
-      generatingPreview: Boolean,
-      // Generated body message preview
-      messagePreview: String
-    },
+        },
+        // true if the message preview is opened
+        previewOpened: {
+          type: Boolean,
+          value: false,
+          observer: '_previewOpenedChanged'
+        },
+        // true if the transformer is generating the message
+        generatingPreview: Boolean,
+        // Generated body message preview
+        messagePreview: String
+      };
+    }
 
-    observers: [
-      '_valueChanged(value, _isOpened)',
-      '_modelChanged(model.*, _isOpened)',
-      '__isOpenedChanged(_isOpened)',
-      '_previewOpenedChanged(previewOpened)',
-      '_modelFromRaml(_isOpened, ramlType)'
-    ],
+    static get observers() {
+      return [
+        '_modelChanged(model.*)'
+      ];
+    }
 
-    __isOpenedChanged: function(opened) {
-      if (opened && !this.model) {
+    ready() {
+      super.ready();
+      if (!this.model) {
         this.addFile();
       }
-    },
-
+    }
     /**
      * Appends new file form row.
      * This changes `model`.
      */
-    addFile: function() {
-      var item = {
-        name: '',
-        value: '',
-        type: 'file'
-      };
-      item = this._createModelObject(item, {});
-      item.isFile = true;
-      if (!this.model) {
-        this.set('model', [item]);
-      } else {
-        this.push('model', item);
-      }
-    },
+    addFile() {
+      this.addCustom('type', {
+        inputLabel: 'Property value'
+      });
+      const index = this.model.length - 1;
+      this.set(`model.${index}.schema.isFile`, true);
+      this.set(`model.${index}.schema.type`, 'file');
+    }
     /**
      * Appends empty text field to the form.
      * This changes `model`.
      */
-    addText: function() {
-      var item = {
-        name: '',
-        value: '',
-        type: 'text'
-      };
-      item = this._createModelObject(item, {});
-      item.isFile = false;
+    addText() {
+      this.addCustom('type', {
+        inputLabel: 'Property value'
+      });
+      const index = this.model.length - 1;
+      this.set(`model.${index}.schema.isFile`, false);
+      this.set(`model.${index}.schema.type`, 'string');
       if (this.hasFormDataSupport) {
-        item.contentType = '';
+        this.set(`model.${index}.contentType`, '');
       }
-      if (!this.model) {
-        this.set('model', [item]);
-      } else {
-        this.push('model', item);
-      }
-    },
-
+    }
     /**
      * Handler for value change.
      * If the element is opened then it will fire change event.
      */
-    _valueChanged: function(value, _isOpened) {
-      if (!_isOpened || !(value instanceof FormData)) {
+    _valueChanged(value) {
+      if (!(value instanceof FormData)) {
         return;
       }
-      var model = [];
-      if (this.model) {
-        if (!this._modelAndValueMatch(this.model, value)) {
+      const currentModel = this.model;
+      if (currentModel) {
+        if (!this._modelAndValueMatch(currentModel, value)) {
           this._restoreFormData(value);
           return;
         }
-        this.model.forEach(function(item) {
-          model.push({
-            name: item.name,
-            value: item.value,
-            contentType: item.contentType,
-            isFile: item.isFile
-          });
-        });
       } else if (value) {
         this._restoreFormData(value);
         return;
       }
-      this.fire('payload-value-changed', {
-        value: value,
-        model: model
-      });
-    },
+    }
     /**
      * Transforms FormData into the data model.
      * Sets new model data.
      *
      * @param {FormData} data Form data to be restored.
      */
-    _restoreFormData: function(data) {
+    _restoreFormData(data) {
       if (!this.hasFormDataSupport) {
         return;
       }
-      var textParts;
+      let textParts;
       if (data._arcMeta && data._arcMeta.textParts) {
         textParts = data._arcMeta.textParts;
       }
-      var it = data.entries();
+      const it = data.entries();
       return this._modelForParts(it, textParts)
-      .then(function(model) {
+      .then((model) => {
         this._cancelModelChange = true;
         this.set('model', model);
         this._cancelModelChange = false;
-      }.bind(this));
-    },
-
-    _modelForParts: function(entries, textParts, result) {
-      /* global Promise */
+      });
+    }
+    /**
+     * @param {Iterator} entries
+     * @param {Array} textParts
+     * @param {Array} result
+     * @return {Promise<Array>}
+     */
+    _modelForParts(entries, textParts, result) {
       result = result || [];
-      var item = entries.next();
+      const item = entries.next();
       if (item.done) {
         return Promise.resolve(result);
       }
-      var part = item.value;
-      var modelItem = {
+      const part = item.value;
+      let modelItem = {
         name: part[0]
       };
-      var restoreBlobValue = false;
+      let restoreBlobValue = false;
       if (typeof part[1] === 'string') {
         modelItem.type = 'text';
       } else {
@@ -384,7 +326,7 @@ Custom property | Description | Default
           modelItem.type = 'file';
         }
       }
-      var promise;
+      let promise;
       if (restoreBlobValue) {
         promise = this._blobToString(part[1]);
       } else {
@@ -392,12 +334,14 @@ Custom property | Description | Default
           result: part[1]
         });
       }
-      return promise
-      .then(function(value) {
+      return promise.then((value) => {
         modelItem.value = value.result;
         modelItem = this._createModelObject(modelItem, {});
-        modelItem.isFile = modelItem.type === 'file' ? true : false;
-        if (modelItem.isFile) {
+        if (!modelItem.schema) {
+          modelItem.schema = {};
+        }
+        modelItem.schema.isFile = modelItem.type === 'file' ? true : false;
+        if (modelItem.schema.isFile) {
           modelItem.value = part[1];
         }
         if (restoreBlobValue) {
@@ -405,12 +349,35 @@ Custom property | Description | Default
         }
         result.push(modelItem);
         return this._modelForParts(entries, textParts, result);
-      }.bind(this));
-    },
-
-    _blobToString: function(blob) {
+      });
+    }
+    /**
+     * It dispatches `api-property-model-build` custom event that is handled by
+     * `api-view-model-transformer` to build model item.
+     * This assumes that the transformer element is already in the DOM.
+     *
+     * @param {Object} defs Defaults for model
+     * @return {Object} Tranformed object.
+     */
+    _createModelObject(defs) {
+      const e = new CustomEvent('api-property-model-build', {
+        bubbles: true,
+        composed: true,
+        cancelable: true,
+        detail: defs
+      });
+      this.dispatchEvent(e);
+      return e.detail;
+    }
+    /**
+     * Transforms `Blob` to string.
+     *
+     * @param {Blob} blob A blob to read.
+     * @return {Promise<String>} Read content.
+     */
+    _blobToString(blob) {
       return new Promise(function(resolve) {
-        var reader = new FileReader();
+        const reader = new FileReader();
         reader.addEventListener('loadend', function(e) {
           resolve({
             result: e.target.result,
@@ -425,7 +392,7 @@ Custom property | Description | Default
         });
         reader.readAsText(blob);
       });
-    },
+    }
 
     /**
      * Tests if current model and FormData object represent the same form data.
@@ -434,7 +401,7 @@ Custom property | Description | Default
      * @param {FormData} value Form data with values
      * @return {Boolean} True if model represents data in FormData object
      */
-    _modelAndValueMatch: function(model, value) {
+    _modelAndValueMatch(model, value) {
       if (!this.hasFormDataSupport) {
         return true;
       }
@@ -444,15 +411,15 @@ Custom property | Description | Default
       if (!value) {
         return true;
       }
-      var it = value.keys();
-      var modelSize = model.length;
+      const it = value.keys();
+      const modelSize = model.length;
       while (true) {
-        var item = it.next();
+        const item = it.next();
         if (item.done) {
           return true;
         }
-        var fasItem = false;
-        for (var i = 0; i < modelSize; i++) {
+        let fasItem = false;
+        for (let i = 0; i < modelSize; i++) {
           if (model[i].name === item.value) {
             fasItem = true;
             break;
@@ -462,51 +429,49 @@ Custom property | Description | Default
           return false;
         }
       }
-    },
+    }
     // Generates a message and displays highlighted content of the message.
-    _previewOpenedChanged: function(opened) {
-      if (opened) {
-        if (!this.value) {
-          var toast = this.$$('paper-toast');
-          toast.text = 'Add a valid form items first';
-          toast.opened = true;
+    _previewOpenedChanged(opened) {
+      if (!opened) {
+        return;
+      }
+      if (!this.value) {
+        const toast = this.shadowRoot.querySelector('paper-toast');
+        toast.text = 'Add a valid form items first';
+        toast.opened = true;
+        this.previewOpened = false;
+        return;
+      }
+      this._generatePreview()
+      .then((preview) => {
+        if (!preview) {
           this.previewOpened = false;
           return;
         }
-        this._generatePreview()
-        .then(function(preview) {
-          if (!preview) {
-            this.previewOpened = false;
-            return;
-          }
-          var event = this.fire('syntax-highlight', {
+        const e = new CustomEvent('syntax-highlight', {
+          bubbles: true,
+          composed: true,
+          detail: {
             code: preview,
             lang: 'http'
-          }, {composed: true});
-          this.$$('code').innerHTML = event.detail.code || preview;
-        }.bind(this));
-      }
-    },
+          }
+        });
+        this.dispatchEvent(e);
+        this.shadowRoot.querySelector('code').innerHTML = e.detail.code || preview;
+      });
+    }
 
-    _computeToggleIcon: function(previewOpened) {
+    _computeToggleIcon(previewOpened) {
       return previewOpened ? 'arc:visibility-off' : 'arc:visibility';
-    },
-    /**
-     * Removes form item.
-     * @param {Number} index Item's index position.
-     */
-    removeItem: function(index) {
-      this.splice('model', index, 1);
-    },
+    }
 
-    _removeItem: function(e) {
-      e.stopPropagation();
-      var index = e.model.get('index');
-      this.removeItem(index);
-    },
-    // Called when the model chage. Regenerates the FormData object.
-    _modelChanged: function(record, _isOpened) {
-      if (!_isOpened || this._cancelModelChange) {
+    /**
+     * Called when the model chage. Regenerates the FormData object.
+     *
+     * @param {Object} record Polymer change record
+     */
+    _modelChanged(record) {
+      if (this._cancelModelChange) {
         return;
       }
       if (!record || !record.path) {
@@ -515,40 +480,42 @@ Custom property | Description | Default
       if (record.path === 'model.splices') {
         return;
       }
-      var formData = this.createFormData(record.base);
+      const formData = this.createFormData(record.base);
       this.set('value', formData);
-    },
+    }
     /**
      * Generates FormData from the model.
      * For the browsers with full FormData support it will generate Form data object from form
      * element. It means that it will have only basic support.
      * For browsers with full FormData support it will contain all properties (including
      * mime types).
+     *
+     * @param {Array} model View data model.
      */
-    createFormData: function(model) {
+    createFormData(model) {
       if (this.hasFormDataSupport) {
         return this._getFormData(model);
       } else {
         return this._getLegacyFormData(model);
       }
-    },
+    }
     /**
      * Generates the FormData object from the model instead of the form.
      *
      * @param {Array} model The model to generate form data from.
      * @return {FormData|undefined} Form data from model or undefined if model is empty.
      */
-    _getFormData: function(model) {
+    _getFormData(model) {
       if (!model || !model.length) {
         return;
       }
-      var fd = new FormData();
-      var hasValue = false;
-      model.forEach(function(item) {
+      const fd = new FormData();
+      let hasValue = false;
+      model.forEach((item) => {
         if (!item.name) {
           return;
         }
-        if (item.isFile) {
+        if (item.schema.isFile) {
           if (!item.value) {
             return;
           }
@@ -572,7 +539,7 @@ Custom property | Description | Default
         }
       });
       return hasValue ? fd : undefined;
-    },
+    }
     /**
      * Returns a FormData object depending if current form has any value.
      * Text items can be empty.
@@ -581,82 +548,62 @@ Custom property | Description | Default
      * @return {FormData|undefined} Form data from model or undefined if model
      * is empty.
      */
-    _getLegacyFormData: function(model) {
+    _getLegacyFormData(model) {
       if (!model || !model.length) {
         return;
       }
-      var values = model.map(function(item) {
-        if (!item.name) {
-          return;
-        }
-        return item.value;
-      });
-      var hasValue = false;
-      for (var i = 0, len = values.length; i < len; i++) {
-        if (!!values[i]) {
+      let hasValue = false;
+      for (var i = 0, len = model.length; i < len; i++) {
+        if (model[i].value) {
           hasValue = true;
-          break;
         }
       }
-      return hasValue ? new FormData(this.$.form) : undefined;
-    },
+      return hasValue ? new FormData(this._getForm()) : undefined;
+    }
     /**
      * Generates a preview message from the FormData object.
      *
      * @return {Promise} A promise fulfilled with the content. Content can be undefined
      * if message couldn't be generated because of lack of support.
      */
-    _generatePreview: function() {
+    _generatePreview() {
       this.set('messagePreview', undefined);
       this.set('generatingPreview', true);
-      var transformer = this.$$('multipart-payload-transformer');
+      const transformer = this.shadowRoot.querySelector('multipart-payload-transformer');
       transformer.formData = this.value;
       return transformer.generatePreview()
-      .then(function(preview) {
+      .then((preview) => {
         this.set('generatingPreview', false);
         this.set('messagePreview', preview);
         return preview;
-      }.bind(this))
-      .catch(function(cause) {
+      })
+      .catch((cause) => {
         this.set('generatingPreview', false);
-        var toast = this.$$('paper-toast');
+        const toast = this.shadowRoot.querySelector('paper-toast');
         toast.text = cause.message;
         toast.opened = true;
-      }.bind(this));
-    },
+      });
+    }
     // Handler for copy to clipboard click.
-    _copyToClipboard: function() {
-      var elm = this.$$('clipboard-copy');
+    _copyToClipboard() {
+      const elm = this.shadowRoot.querySelector('clipboard-copy');
       if (elm.copy()) {
-        this.$$('#copyIcon').icon = 'arc:done';
+        this.shadowRoot.querySelector('#copyIcon').icon = 'arc:done';
       } else {
-        this.$$('#copyIcon').icon = 'arc:error';
-        var toast = this.$$('paper-toast');
+        this.shadowRoot.querySelector('#copyIcon').icon = 'arc:error';
+        const toast = this.shadowRoot.querySelector('paper-toast');
         toast.text = 'Copy command is disabled in your browser.';
         toast.opened = true;
       }
       if (this.__copyButtonAsync) {
-        this.cancelAsync(this.__copyButtonAsync);
+        clearTimeout(this.__copyButtonAsync);
       }
-      this.__copyButtonAsync = this.async(function() {
-        this.$$('#copyIcon').icon = 'arc:content-copy';
+      this.__copyButtonAsync = setTimeout(() => {
+        this.shadowRoot.querySelector('#copyIcon').icon = 'arc:content-copy';
         this.__copyButtonAsync = undefined;
       }, 1000);
-    },
-    /**
-     * Creates a view model after RAML type change.
-     */
-    _modelFromRaml: function(_isOpened, ramlType) {
-      if (!_isOpened || !ramlType || !ramlType.properties) {
-        return;
-      }
-      var model = ramlType.properties.map(function(value) {
-        var model = this._createModelObject(value, {});
-        model.isFile = model.type === 'file';
-        return model;
-      }, this);
-      this.set('model', model);
     }
-  });
+  }
+  window.customElements.define(MultipartPayloadEditor.is, MultipartPayloadEditor);
   </script>
 </dom-module>
