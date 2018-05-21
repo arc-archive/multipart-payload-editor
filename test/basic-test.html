@@ -1,111 +1,95 @@
 <!doctype html>
-<!--
-@license
-Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
-This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
-The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
-The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
-Code distributed by Google as part of the polymer project is also
-subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
--->
 <html>
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
-
-    <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+    <script src="../../webcomponentsjs/webcomponents-loader.js"></script>
     <script src="../../web-component-tester/browser.js"></script>
     <script src="../../iron-test-helpers/test-helpers.js"></script>
-    <script src="../../iron-test-helpers/mock-interactions.js"></script>
+    <link rel="import" href="../../api-view-model-transformer/api-view-model-transformer.html">
     <link rel="import" href="../multipart-payload-editor.html">
   </head>
   <body>
-
+    <api-view-model-transformer></api-view-model-transformer>
     <test-fixture id="basic">
       <template>
         <multipart-payload-editor></multipart-payload-editor>
       </template>
     </test-fixture>
 
-    <test-fixture id="opened">
-      <template>
-        <multipart-payload-editor attr-for-opened="opened"></multipart-payload-editor>
-      </template>
-    </test-fixture>
-
     <script>
-    /* global fixture, assert, TestHelpers, sinon */
-    suite('multipart-payload-editor', function() {
-      suite('basic', function() {
-        var element;
+    /* global TestHelpers */
+    suite('multipart-payload-editor', () => {
+      suite('basic', () => {
+        let element;
 
-        setup(function() {
+        setup((done) => {
           element = fixture('basic');
-          TestHelpers.forceXIfStamp(element);
+          flush(() => done());
         });
 
-        test('model is an array', function() {
+        test('model is an array', () => {
           assert.typeOf(element.model, 'array');
         });
 
-        test('model has one item', function() {
+        test('model has one item', () => {
           assert.lengthOf(element.model, 1);
         });
 
-        test('added item is a file', function() {
-          assert.isTrue(element.model[0].isFile);
+        test('added item is a file', () => {
+          assert.isTrue(element.model[0].schema.isFile);
         });
 
-        test('value is undefined', function() {
+        test('value is undefined', () => {
           assert.isUndefined(element.value);
         });
 
-        test('value is messagePreview', function() {
+        test('value is messagePreview', () => {
           assert.isUndefined(element.messagePreview);
         });
 
-        test('previewOpened is false', function() {
+        test('previewOpened is false', () => {
           assert.isFalse(element.previewOpened);
         });
 
-        test('generatingPreview is undefined', function() {
+        test('generatingPreview is undefined', () => {
           assert.isUndefined(element.generatingPreview);
         });
       });
 
-      suite('addFile()', function() {
-        var element;
+      suite('addFile()', () => {
+        let element;
 
-        setup(function() {
+        setup(() => {
           element = fixture('basic');
           element.addFile();
         });
 
-        test('model is an array', function() {
+        test('model is an array', () => {
           assert.typeOf(element.model, 'array');
         });
 
-        test('model has two item', function() {
+        test('model has two item', () => {
           assert.lengthOf(element.model, 2);
         });
 
-        test('added item is a file', function() {
-          assert.isTrue(element.model[1].isFile);
+        test('added item is a file', () => {
+          assert.isTrue(element.model[1].schema.isFile);
         });
 
-        test('added item has empty name', function() {
+        test('added item has empty name', () => {
           assert.equal(element.model[1].name, '');
         });
 
-        test('added item value is undefined', function() {
+        test('added item value is undefined', () => {
           assert.notOk(element.model[1].value);
         });
       });
 
-      suite('addText()', function() {
-        var element;
+      suite('addText()', () => {
+        let element;
 
-        setup(function() {
+        setup(() => {
           element = fixture('basic');
           element.addText();
         });
@@ -114,75 +98,79 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           return element.hasFormDataSupport;
         }
 
-        test('model is an array', function() {
+        test('model is an array', () => {
           assert.typeOf(element.model, 'array');
         });
 
-        test('model has one item', function() {
+        test('model has one item', () => {
           assert.lengthOf(element.model, 2);
         });
 
-        test('added item is not a file', function() {
-          assert.isFalse(element.model[1].isFile);
+        test('added item is not a file', () => {
+          assert.isFalse(element.model[1].schema.isFile);
         });
 
-        test('added item has empty name', function() {
+        test('added item has empty name', () => {
           assert.equal(element.model[1].name, '');
         });
 
-        test('added item has empty value', function() {
+        test('added item has empty value', () => {
           assert.equal(element.model[1].value, '');
         });
 
-        test('added item has empty contentType', TestHelpers.skipUnless(hasAdvancedSupport, function() {
+        test('added item has empty contentType', TestHelpers.skipUnless(hasAdvancedSupport, () => {
           assert.equal(element.model[1].contentType, '');
         }));
       });
 
-      suite('createFormData()', function() {
-        var element;
+      suite('createFormData()', () => {
+        let element;
 
-        setup(function() {
+        setup(() => {
           element = fixture('basic');
         });
 
-        test('Do not generate FormData with empty model', function() {
+        test('Do not generate FormData with empty model', () => {
           assert.isUndefined(element.createFormData([]));
         });
 
-        test('Do not generate FormData data for model with empty values', function() {
-          assert.isUndefined(element.createFormData([{name: '', file: true}]));
+        test('Do not generate FormData data for model with empty values', () => {
+          assert.isUndefined(element.createFormData([{name: '', schema: {isFile: true}}]));
         });
 
-        test('Generates form data for text value', function() {
-          var fd = element.createFormData([{name: 'test', value: 'test', text: true}]);
+        test('Generates form data for text value', () => {
+          const fd = element.createFormData([{name: 'test', value: 'test', schema: {isFile: false}}]);
           assert.typeOf(fd, 'formdata');
         });
 
-        test('Generates form data for text value with content type', function() {
-          var fd = element.createFormData([{
+        test('Generates form data for text value with content type', () => {
+          const fd = element.createFormData([{
             name: 'test',
             value: 'test',
-            isFile: false,
+            schema: {
+              isFile: false,
+            },
             contentType: 'application/json'
           }]);
           assert.typeOf(fd, 'formdata');
         });
 
-        test('Generates form data for file value', function() {
-          var fd = element.createFormData([{
+        test('Generates form data for file value', () => {
+          const fd = element.createFormData([{
             name: 'test',
             value: new Blob(['test'], {type: 'application/json'}),
-            isFile: true
+            schema: {
+              isFile: true
+            }
           }]);
           assert.typeOf(fd, 'formdata');
         });
       });
 
-      suite('action controls', function() {
-        var element;
+      suite('action controls', () => {
+        let element;
 
-        setup(function() {
+        setup(() => {
           element = fixture('basic');
           TestHelpers.forceXIfStamp(element);
         });
@@ -195,22 +183,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           return !element.hasFormDataSupport;
         }
 
-        test('editor-actions are rendered', TestHelpers.skipUnless(hasAdvancedSupport, function() {
-          var container = element.$$('.editor-actions');
+        test('editor-actions are rendered', TestHelpers.skipUnless(hasAdvancedSupport, () => {
+          const container = element.$$('.editor-actions');
           assert.ok(container);
         }));
 
-        test('editor-actions are rendered', TestHelpers.skipUnless(advancedSupportDisabled, function() {
-          var container = element.$$('.editor-actions');
+        test('editor-actions are rendered', TestHelpers.skipUnless(advancedSupportDisabled, () => {
+          const container = element.$$('.editor-actions');
           assert.notOk(container);
         }));
 
       });
 
-      suite('_generatePreview()', function() {
-        var element;
+      suite('_generatePreview()', () => {
+        let element;
 
-        setup(function() {
+        setup(() => {
           element = fixture('basic');
         });
 
@@ -218,135 +206,71 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           return element.hasFormDataSupport;
         }
 
-        test('Generates preview data for file', TestHelpers.skipUnless(hasAdvancedSupport, function() {
-          var fd = element.createFormData([{
+        test('Generates preview data for file', TestHelpers.skipUnless(hasAdvancedSupport, () => {
+          const fd = element.createFormData([{
             name: 'test',
             value: 'test',
-            text: true,
-            contentType: 'application/json'
+            contentType: 'application/json',
+            schema: {isFile: false}
           }]);
           element.value = fd;
           return element._generatePreview()
-          .then(function(content) {
+          .then((content) => {
             assert.typeOf(content, 'strnig');
           });
         }));
 
-        test('Generates preview data for text', TestHelpers.skipUnless(hasAdvancedSupport, function() {
-          var fd = element.createFormData([{name: 'test', value: 'test', text: true}]);
+        test('Generates preview data for text', TestHelpers.skipUnless(hasAdvancedSupport, () => {
+          const fd = element.createFormData([{name: 'test', value: 'test', schema: {isFile: false}}]);
           element.value = fd;
           return element._generatePreview()
-          .then(function(content) {
+          .then((content) => {
             assert.typeOf(content, 'strnig');
           });
         }));
 
-        test('messagePreview is cleared', TestHelpers.skipUnless(hasAdvancedSupport, function() {
-          var fd = element.createFormData([{name: 'test', value: 'test', text: true}]);
+        test('messagePreview is cleared', TestHelpers.skipUnless(hasAdvancedSupport, () => {
+          const fd = element.createFormData([{name: 'test', value: 'test', schema: {isFile: false}}]);
           element.value = fd;
-          var p = element._generatePreview();
+          const p = element._generatePreview();
           assert.isUndefined(element.messagePreview);
           return p;
         }));
 
         test('messagePreview is set after finish',
-          TestHelpers.skipUnless(hasAdvancedSupport, function() {
-          var fd = element.createFormData([{name: 'test', value: 'test', text: true}]);
+          TestHelpers.skipUnless(hasAdvancedSupport, () => {
+          const fd = element.createFormData([{name: 'test', value: 'test', schema: {isFile: false}}]);
           element.value = fd;
           return element._generatePreview()
-          .then(function() {
+          .then(() => {
             assert.typeOf(element.messagePreview, 'strnig');
           });
         }));
 
         test('generatingPreview is true when working',
-          TestHelpers.skipUnless(hasAdvancedSupport, function() {
-          var fd = element.createFormData([{name: 'test', value: 'test', text: true}]);
+          TestHelpers.skipUnless(hasAdvancedSupport, () => {
+          const fd = element.createFormData([{name: 'test', value: 'test', schema: {isFile: false}}]);
           element.value = fd;
           element._generatePreview();
           assert.isTrue(element.generatingPreview);
         }));
 
         test('generatingPreview is false after finish',
-          TestHelpers.skipUnless(hasAdvancedSupport, function() {
-          var fd = element.createFormData([{name: 'test', value: 'test', text: true}]);
+          TestHelpers.skipUnless(hasAdvancedSupport, () => {
+          const fd = element.createFormData([{name: 'test', value: 'test', schema: {isFile: false}}]);
           element.value = fd;
           return element._generatePreview()
-          .then(function() {
+          .then(() => {
             assert.isFalse(element.generatingPreview);
           });
         }));
       });
-
-      suite('model change notifier', function() {
-        var element;
-
-        setup(function() {
-          element = fixture('basic');
-        });
-
-        test('Sets a value', function() {
-          element.set(['model', 0, 'name'], 'test');
-          element.set(['model', 0, 'value'], 'test');
-          assert.typeOf(element.value, 'formdata');
-        });
-
-        test('Fires payload-value-changed event', function() {
-          var spy = sinon.stub();
-          element.addEventListener('payload-value-changed', spy);
-          element.set(['model', 0, 'name'], 'test');
-          element.set(['model', 0, 'value'], 'test');
-          assert.isTrue(spy.calledOnce);
-        });
-      });
-
-      suite('attr-for-opened', function() {
-        var element;
-
-        setup(function() {
-          element = fixture('opened');
-          TestHelpers.forceXIfStamp(element);
-        });
-
-        test('Do not modifies the value if not opened', function() {
-          var compare = element.value;
-          element.set(['model', 0, 'name'], 'test');
-          element.set(['model', 0, 'value'], 'test');
-          assert.equal(element.value, compare);
-        });
-
-        test('Modifies the value when opened', function() {
-          var compare = element.value;
-          element.setAttribute('opened', true);
-          element.set(['model', 0, 'name'], 'test');
-          element.set(['model', 0, 'value'], 'test');
-          assert.notEqual(element.value, compare);
-        });
-
-        test('Do not fires payload-value-changed event', function() {
-          var spy = sinon.stub();
-          element.addEventListener('payload-value-changed', spy);
-
-          element.set(['model', 0, 'name'], 'test');
-          element.set(['model', 0, 'value'], 'test');
-          assert.isFalse(spy.called);
-        });
-
-        test('Fires payload-value-changed event when opened', function() {
-          var spy = sinon.stub();
-          element.addEventListener('payload-value-changed', spy);
-          element.setAttribute('opened', true);
-          element.set(['model', 0, 'name'], 'test');
-          element.set(['model', 0, 'value'], 'test');
-          assert.isTrue(spy.called);
-        });
-      });
     });
 
-    suite('Restore form data', function() {
-      var fd;
-      var element;
-      setup(function() {
+    suite('Restore form data', () => {
+      let fd;
+      let element;
+      setup(() => {
         fd = new FormData();
         fd.append('text', 'test');
         try {
@@ -356,44 +280,44 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         element = fixture('basic');
       });
 
-      test('Creates model from FormData', function() {
+      test('Creates model from FormData', () => {
         if (!element.hasFormDataSupport) {
           return;
         }
         return element._restoreFormData(fd)
-        .then(function() {
+        .then(() => {
           assert.typeOf(element.model, 'array');
           assert.lengthOf(element.model, 3);
         });
       });
 
-      test('Restores text data', function() {
+      test('Restores text data', () => {
         if (!element.hasFormDataSupport) {
           return;
         }
         return element._restoreFormData(fd)
-        .then(function() {
-          var model = element.model[0];
-          assert.isFalse(model.isFile);
+        .then(() => {
+          const model = element.model[0];
+          assert.isFalse(model.schema.isFile);
           assert.equal(model.name, 'text');
           assert.equal(model.value, 'test');
         });
       });
 
-      test('Restores file data', function() {
+      test('Restores file data', () => {
         if (!element.hasFormDataSupport) {
           return;
         }
         return element._restoreFormData(fd)
-        .then(function() {
-          var model = element.model[1];
-          assert.isTrue(model.isFile);
+        .then(() => {
+          const model = element.model[1];
+          assert.isTrue(model.schema.isFile);
           assert.equal(model.name, 'file');
           assert.isTrue(model.value instanceof Blob);
         });
       });
 
-      test('Restores text from ARC meta', function() {
+      test('Restores text from ARC meta', () => {
         if (!element.hasFormDataSupport) {
           return;
         }
@@ -401,9 +325,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           textParts: ['text-w-ct']
         };
         return element._restoreFormData(fd)
-        .then(function() {
-          var model = element.model[2];
-          assert.isFalse(model.isFile);
+        .then(() => {
+          const model = element.model[2];
+          assert.isFalse(model.schema.isFile);
           assert.equal(model.name, 'text-w-ct');
           assert.equal(model.value, 'test');
           assert.equal(model.contentType, 'plain/text');
