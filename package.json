@@ -4,7 +4,7 @@
   "license": "Apache-2.0",
   "description": "Multipart payload editor for ARC body editor",
   "devDependencies": {
-    "@polymer/gen-typescript-declarations": "^1.1.1"
+    "@polymer/gen-typescript-declarations": "^1.5.1"
   },
   "authors": [
     "Pawel Psztyc",
