@@ -1,3 +1,13 @@
+<a name="2.0.2"></a>
+## [2.0.2](https://github.com/advanced-rest-client/multipart-payload-editor/compare/2.0.0-preview...2.0.2) (2018-10-31)
+
+
+### Docs
+
+* Updating docs and typings ([eaf331e029839fd7006077badbfbc00bf91de3dc](https://github.com/advanced-rest-client/multipart-payload-editor/commit/eaf331e029839fd7006077badbfbc00bf91de3dc))
+
+
+
 <a name="2.0.1"></a>
 ## [2.0.1](https://github.com/advanced-rest-client/multipart-payload-editor/compare/0.2.8...2.0.1) (2018-05-21)
 
