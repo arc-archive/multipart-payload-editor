@@ -3,11 +3,11 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
-    <script src="../../webcomponentsjs/webcomponents-loader.js"></script>
-    <script src="../../web-component-tester/browser.js"></script>
-    <script src="../../iron-test-helpers/test-helpers.js"></script>
-    <link rel="import" href="../../api-view-model-transformer/api-view-model-transformer.html">
-    <link rel="import" href="../multipart-payload-editor.html">
+    <script src="../../../@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
+    <script src="../../../wct-browser-legacy/browser.js"></script>
+    <script src="../../../@polymer/iron-test-helpers/test-helpers.js" type="module"></script>
+    <script type="module" src="../../../api-view-model-transformer/api-view-model-transformer.js"></script>
+    <script type="module" src="../multipart-payload-editor.js"></script>
   </head>
   <body>
     <api-view-model-transformer></api-view-model-transformer>
@@ -17,7 +17,9 @@
       </template>
     </test-fixture>
 
-    <script>
+    <script type="module">
+    import '../../../api-view-model-transformer/api-view-model-transformer.js';
+    import '../multipart-payload-editor.js';
     /* global TestHelpers */
     suite('multipart-payload-editor', () => {
       suite('basic', () => {
