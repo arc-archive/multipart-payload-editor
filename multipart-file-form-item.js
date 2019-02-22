@@ -11,20 +11,19 @@ WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 License for the specific language governing permissions and limitations under
 the License.
 */
-import { PolymerElement } from '../../@polymer/polymer/polymer-element.js';
-
-import '../../@polymer/polymer/lib/elements/dom-if.js';
-import { IronValidatableBehavior } from '../../@polymer/iron-validatable-behavior/iron-validatable-behavior.js';
-import '../../@polymer/paper-input/paper-input.js';
-import '../../@polymer/paper-button/paper-button.js';
-import '../../@polymer/paper-icon-button/paper-icon-button.js';
-import '../../@polymer/iron-flex-layout/iron-flex-layout.js';
-import '../../arc-icons/arc-icons.js';
-import '../../@polymer/iron-collapse/iron-collapse.js';
-import '../../@polymer/marked-element/marked-element.js';
-import '../../markdown-styles/markdown-styles.js';
-import { html } from '../../@polymer/polymer/lib/utils/html-tag.js';
-import { mixinBehaviors } from '../../@polymer/polymer/lib/legacy/class.js';
+import {PolymerElement} from '@polymer/polymer/polymer-element.js';
+import {IronValidatableBehavior} from '@polymer/iron-validatable-behavior/iron-validatable-behavior.js';
+import {html} from '@polymer/polymer/lib/utils/html-tag.js';
+import {mixinBehaviors} from '@polymer/polymer/lib/legacy/class.js';
+import '@polymer/polymer/lib/elements/dom-if.js';
+import '@polymer/paper-input/paper-input.js';
+import '@polymer/paper-button/paper-button.js';
+import '@polymer/paper-icon-button/paper-icon-button.js';
+import '@polymer/iron-flex-layout/iron-flex-layout.js';
+import '@advanced-rest-client/arc-icons/arc-icons.js';
+import '@polymer/iron-collapse/iron-collapse.js';
+import '@polymer/marked-element/marked-element.js';
+import '@advanced-rest-client/markdown-styles/markdown-styles.js';
 /**
  * A file form item.
  *
@@ -83,13 +82,15 @@ class MultipartFileFormItem extends mixinBehaviors([IronValidatableBehavior], Po
     </style>
     <div class="file-row">
       <div class="controls">
-        <paper-input error-message="The name is required" label="Field name" required="" auto-validate="" value="{{name}}" class="name-field"></paper-input>
-        <paper-button raised="" on-tap="_selectFile" class="file-trigger">Choose file</paper-button>
+        <paper-input error-message="The name is required" label="Field name"
+          required="" auto-validate="" value="{{name}}" class="name-field"></paper-input>
+        <paper-button raised="" on-click="_selectFile" class="file-trigger">Choose file</paper-button>
         <template is="dom-if" if="[[hasFile]]">
           <span class="files-counter-message" hidden\$="[[!hasFile]]">[[value.name]] ([[value.size]] bytes)</span>
         </template>
         <template is="dom-if" if="[[model.hasDescription]]">
-          <paper-icon-button class="hint-icon" icon="arc:help" on-tap="toggleDocumentation" title="Display documentation"></paper-icon-button>
+          <paper-icon-button class="hint-icon" icon="arc:help"
+            on-click="toggleDocumentation" title="Display documentation"></paper-icon-button>
         </template>
       </div>
       <template is="dom-if" if="[[model.hasDescription]]" restamp="">
@@ -106,7 +107,9 @@ class MultipartFileFormItem extends mixinBehaviors([IronValidatableBehavior], Po
 `;
   }
 
-  static get is() { return 'multipart-file-form-item'; }
+  static get is() {
+    return 'multipart-file-form-item';
+  }
   static get properties() {
     return {
       /**
@@ -173,12 +176,17 @@ class MultipartFileFormItem extends mixinBehaviors([IronValidatableBehavior], Po
   /**
    * A handler to file change event for input[type="file"].
    * This will update files array for corresponding `this.filesList` array object.
+   *
+   * @param {Event} e
    */
   _fileObjectChanged(e) {
     this.set('value', e.target.files[0]);
   }
   /**
    * Computes the `accept`attribute for file input.
+   *
+   * @param {Object} model
+   * @return {String}
    */
   _computeAccept(model) {
     if (!model) {

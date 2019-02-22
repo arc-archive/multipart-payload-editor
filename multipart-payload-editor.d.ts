@@ -5,28 +5,22 @@
  *   https://github.com/Polymer/tools/tree/master/packages/gen-typescript-declarations
  *
  * To modify these typings, edit the source file(s):
- *   multipart-payload-editor.html
+ *   multipart-payload-editor.js
  */
 
-/// <reference path="../polymer/types/polymer-element.d.ts" />
-/// <reference path="../polymer/types/lib/elements/dom-if.d.ts" />
-/// <reference path="../polymer/types/lib/elements/dom-repeat.d.ts" />
-/// <reference path="../arc-icons/arc-icons.d.ts" />
-/// <reference path="../iron-form/iron-form.d.ts" />
-/// <reference path="../iron-flex-layout/iron-flex-layout.d.ts" />
-/// <reference path="../paper-icon-button/paper-icon-button.d.ts" />
-/// <reference path="../paper-spinner/paper-spinner.d.ts" />
-/// <reference path="../paper-toast/paper-toast.d.ts" />
-/// <reference path="../api-form-mixin/api-form-mixin.d.ts" />
-/// <reference path="../api-form-mixin/api-form-styles.d.ts" />
-/// <reference path="../multipart-payload-transformer/multipart-payload-transformer.d.ts" />
-/// <reference path="../iron-validatable-behavior/iron-validatable-behavior.d.ts" />
-/// <reference path="../clipboard-copy/clipboard-copy.d.ts" />
-/// <reference path="../prism-element/prism-highlighter.d.ts" />
-/// <reference path="../prism-element/prism-theme-default.d.ts" />
-/// <reference path="../prism-common/prism-http-import.d.ts" />
-/// <reference path="multipart-text-form-item.d.ts" />
-/// <reference path="multipart-file-form-item.d.ts" />
+
+// tslint:disable:variable-name Describing an API that's defined elsewhere.
+// tslint:disable:no-any describes the API as best we are able today
+
+import {PolymerElement} from '@polymer/polymer/polymer-element.js';
+
+import {IronValidatableBehavior} from '@polymer/iron-validatable-behavior/iron-validatable-behavior.js';
+
+import {mixinBehaviors} from '@polymer/polymer/lib/legacy/class.js';
+
+import {html} from '@polymer/polymer/lib/utils/html-tag.js';
+
+import {ApiFormMixin} from '@api-components/api-form-mixin/api-form-mixin.js';
 
 declare namespace ApiComponents {
 
@@ -78,9 +72,8 @@ declare namespace ApiComponents {
    * style form controls.
    */
   class MultipartPayloadEditor extends
-    Polymer.IronValidatableBehavior(
-    ArcBehaviors.ApiFormMixin(
-    Object)) {
+    ApiFormMixin(
+    Object) {
 
     /**
      * Value of this form
@@ -124,7 +117,7 @@ declare namespace ApiComponents {
      * Handler for value change.
      * If the element is opened then it will fire change event.
      */
-    _valueChanged(value: any): void;
+    _valueChanged(value: FormData|null): void;
 
     /**
      * Transforms FormData into the data model.
@@ -132,7 +125,7 @@ declare namespace ApiComponents {
      *
      * @param data Form data to be restored.
      */
-    _restoreFormData(data: FormData|null): any;
+    _restoreFormData(data: FormData|null): Promise<any>|null;
     _modelForParts(entries: Iterator|null, textParts: any[]|null, result: any[]|null): Promise<any[]|null>;
 
     /**
@@ -219,6 +212,9 @@ declare namespace ApiComponents {
   }
 }
 
-interface HTMLElementTagNameMap {
-  "multipart-payload-editor": ApiComponents.MultipartPayloadEditor;
+declare global {
+
+  interface HTMLElementTagNameMap {
+    "multipart-payload-editor": ApiComponents.MultipartPayloadEditor;
+  }
 }

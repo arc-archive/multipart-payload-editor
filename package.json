@@ -16,7 +16,7 @@
   "version": "3.0.0-preview.1",
   "license": "Apache-2.0",
   "devDependencies": {
-    "@polymer/gen-typescript-declarations": "^1.5.1",
+    "@polymer/gen-typescript-declarations": "^1.6.1",
     "@polymer/iron-demo-helpers": "^3.0.0",
     "@webcomponents/webcomponentsjs": "^2.0.0",
     "@polymer/iron-component-page": "^4.0.0",
@@ -52,17 +52,25 @@
     "The Advanced REST client authors <arc@mulesoft.com>"
   ],
   "dependencies": {
-    "@polymer/polymer": "^3.0.0",
-    "@polymer/iron-flex-layout": "^3.0.0",
-    "@polymer/iron-validatable-behavior": "^3.0.0",
-    "@polymer/iron-form": "^3.0.0",
-    "@polymer/marked-element": "^3.0.0",
-    "@polymer/paper-icon-button": "^3.0.0",
+    "@advanced-rest-client/arc-icons": "^3.0.0-preview.1",
+    "@advanced-rest-client/markdown-styles": "^3.0.0-preview.1",
+    "@advanced-rest-client/multipart-payload-transformer": "^3.0.0-preview.1",
+    "@advanced-rest-client/paper-autocomplete": "^3.0.0-preview.1",
+    "@api-components/api-form-mixin": "^3.0.0-preview.1",
+    "@api-components/api-property-form-item": "^3.0.0-preview.1",
+    "@api-components/api-view-model-transformer": "^3.0.0-preview.1",
+    "@api-components/clipboard-copy": "^3.0.0-preview.1",
     "@polymer/iron-collapse": "^3.0.0",
-    "@polymer/paper-input": "^3.0.0",
+    "@polymer/iron-flex-layout": "^3.0.0",
+    "@polymer/iron-form": "^3.0.0",
+    "@polymer/iron-validatable-behavior": "^3.0.0",
+    "@polymer/marked-element": "^3.0.0",
     "@polymer/paper-button": "^3.0.0",
+    "@polymer/paper-icon-button": "^3.0.0",
+    "@polymer/paper-input": "^3.0.0",
     "@polymer/paper-spinner": "^3.0.0",
     "@polymer/paper-toast": "^3.0.0",
+    "@polymer/polymer": "^3.0.0",
     "@polymer/prism-element": "^3.0.0"
   }
 }

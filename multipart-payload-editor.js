@@ -11,32 +11,86 @@ WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 License for the specific language governing permissions and limitations under
 the License.
 */
-import { PolymerElement } from '../../@polymer/polymer/polymer-element.js';
-
-import '../../@polymer/polymer/lib/elements/dom-if.js';
-import '../../@polymer/polymer/lib/elements/dom-repeat.js';
-import '../../arc-icons/arc-icons.js';
-import '../../@polymer/iron-form/iron-form.js';
-import '../../@polymer/iron-flex-layout/iron-flex-layout.js';
-import '../../@polymer/paper-icon-button/paper-icon-button.js';
-import '../../@polymer/paper-spinner/paper-spinner.js';
-import '../../@polymer/paper-toast/paper-toast.js';
-import '../../api-form-mixin/api-form-mixin.js';
-import '../../api-form-mixin/api-form-styles.js';
-import '../../multipart-payload-transformer/multipart-payload-transformer.js';
-import { IronValidatableBehavior } from '../../@polymer/iron-validatable-behavior/iron-validatable-behavior.js';
-import '../../clipboard-copy/clipboard-copy.js';
-import '../../@polymer/prism-element/prism-highlighter.js';
-import '../../@polymer/prism-element/prism-theme-default.js';
-import '../../prism-common/prism-http-import.js';
+import {PolymerElement} from '@polymer/polymer/polymer-element.js';
+import {IronValidatableBehavior} from '@polymer/iron-validatable-behavior/iron-validatable-behavior.js';
+import {mixinBehaviors} from '@polymer/polymer/lib/legacy/class.js';
+import {html} from '@polymer/polymer/lib/utils/html-tag.js';
+import {ApiFormMixin} from '@api-components/api-form-mixin/api-form-mixin.js';
+import '@polymer/polymer/lib/elements/dom-if.js';
+import '@polymer/polymer/lib/elements/dom-repeat.js';
+import '@advanced-rest-client/arc-icons/arc-icons.js';
+import '@polymer/iron-form/iron-form.js';
+import '@polymer/iron-flex-layout/iron-flex-layout.js';
+import '@polymer/paper-icon-button/paper-icon-button.js';
+import '@polymer/paper-spinner/paper-spinner.js';
+import '@polymer/paper-toast/paper-toast.js';
+import '@api-components/api-form-mixin/api-form-styles.js';
+import '@advanced-rest-client/multipart-payload-transformer/multipart-payload-transformer.js';
+import '@api-components/clipboard-copy/clipboard-copy.js';
+import '@polymer/prism-element/prism-import.js';
+import '@polymer/prism-element/prism-highlighter.js';
+import '@polymer/prism-element/prism-theme-default.js';
+import 'prismjs/components/prism-http.js';
 import './multipart-text-form-item.js';
 import './multipart-file-form-item.js';
-import { mixinBehaviors } from '../../@polymer/polymer/lib/legacy/class.js';
-const $_documentContainer = document.createElement('template');
-
-$_documentContainer.innerHTML = `<dom-module id="multipart-payload-editor">
-  <template strip-whitespace="">
-    <style include="prism-theme-default"></style>
+/**
+ * Multipart payload editor for ARC/API Console body editor.
+ *
+ * On supported browsers (full support for FormData, Iterator and ArrayBuffer) it will render a
+ * UI controls to generate payload message preview.
+ *
+ * It produces a FormData object that can be used in XHR / Fetch or transformed to ArrayBuffer to be
+ * used in socket connection.
+ *
+ * ### Example
+ * ```html
+ * <multipart-payload-editor value="{{form}}"></multipart-payload-editor>
+ * ```
+ *
+ * ## Data model from FormData
+ *
+ * The element creates a data model for the form view from FormData object.
+ * The limitation of this solution is that the information about initial part type
+ * is lost. In case when the user specified the part as a text part but also added
+ * part content type it will be recognized as the file part.
+ *
+ * Note: this only works in browsers that support full FormData spec which rules
+ * out any Microsoft product. **You have to include polyfills for the FormData.**
+ *
+ * ### Styling
+ *
+ * `<multipart-payload-editor>` provides the following custom properties and mixins for styling:
+ *
+ * Custom property | Description | Default
+ * ----------------|-------------|----------
+ * `--multipart-payload-editor` | Mixin applied to the element | `{}`
+ * `--multipart-payload-editor-code-preview` | Mixin applied to a code preview element | `{}`
+ * `--view-action-bar` | Theme mixin, applied to the content action bar | `{}`
+ * `--multipart-payload-editor-action-bar` | Mixin applied to the content action bar | `{}`
+ * `--body-editor-panel-button-active-background-color` | Background color of the active content action button | `#e0e0e0`
+ * `--body-editor-panel-button-active` | Mixin applied to active content action button | `{}`
+ * `--content-action-icon-color` | Color of the content action icon | `rgba(0, 0, 0, 0.74)`
+ * `--content-action-icon-color-hover` | Color of the content action icon when hovered | `--accent-color` or `rgba(0, 0, 0, 0.74)`
+ * `--inline-documentation-color` | Color of the description text from a RAML type. | `rgba(0, 0, 0, 0.87)`
+ * `--from-row-action-icon-color` | Color of the icon buttons next to the input fields | `--icon-button-color` or `rgba(0, 0, 0, 0.74)`
+ * `--from-row-action-icon-color-hover` | Color of the icon buttons next to the input fields when hovering | `--accent-color` or `rgba(0, 0, 0, 0.74)`,
+ * `--multipart-payload-editor-file-trigger-color` | Color of the file dialog trigger button. | `--accent-color` or `#FF5722`
+ *
+ * This element also inherits styles from
+ * `advanced-rest-client/api-form-mixin/api-form-styles.html` element to
+ * style form controls.
+ *
+ * @customElement
+ * @polymer
+ * @demo demo/simple.html Simple usage
+ * @demo demo/raml.html With AMF model from RAML file
+ * @polymerBehavior Polymer.IronValidatableBehavior
+ * @appliesMixin ApiFormMixin
+ * @memberof ApiComponents
+ */
+class MultipartPayloadEditor extends mixinBehaviors([IronValidatableBehavior], ApiFormMixin(PolymerElement)) {
+  static get template() {
+    return html`<style include="prism-theme-default"></style>
     <style include="api-form-styles"></style>
     <style>
     :host {
@@ -90,8 +144,12 @@ $_documentContainer.innerHTML = `<dom-module id="multipart-payload-editor">
     </style>
     <template is="dom-if" if="[[hasFormDataSupport]]">
       <div class="editor-actions">
-        <paper-icon-button id="previewIcon" icon="[[_computeToggleIcon(previewOpened)]]" class="action-icon" toggles="" active="{{previewOpened}}" disabled="[[generatingPreview]]" title="Toggles generated payload message preview"></paper-icon-button>
-        <paper-icon-button id="copyIcon" icon="arc:content-copy" class="action-icon" on-tap="_copyToClipboard" disabled="[[generatingPreview]]" hidden\$="[[!previewOpened]]" title="Copy payload message"></paper-icon-button>
+        <paper-icon-button id="previewIcon" icon="[[_computeToggleIcon(previewOpened)]]"
+          class="action-icon" toggles="" active="{{previewOpened}}" disabled="[[generatingPreview]]"
+          title="Toggles generated payload message preview"></paper-icon-button>
+        <paper-icon-button id="copyIcon" icon="arc:content-copy" class="action-icon"
+          on-click="_copyToClipboard" disabled="[[generatingPreview]]" hidden\$="[[!previewOpened]]"
+          title="Copy payload message"></paper-icon-button>
         <paper-spinner alt="Loading preview" active="[[generatingPreview]]"></paper-spinner>
       </div>
     </template>
@@ -101,20 +159,25 @@ $_documentContainer.innerHTML = `<dom-module id="multipart-payload-editor">
           <template is="dom-repeat" id="list" items="{{model}}" observe="value">
             <div class="form-item" data-file\$="[[item.schema.isFile]]">
               <template is="dom-if" if="[[item.schema.isFile]]">
-                <multipart-file-form-item name="{{item.name}}" value="{{item.value}}" model="[[item]]" required="" auto-validate=""></multipart-file-form-item>
+                <multipart-file-form-item name="{{item.name}}" value="{{item.value}}"
+                  model="[[item]]" required="" auto-validate=""></multipart-file-form-item>
               </template>
               <template is="dom-if" if="[[!item.schema.isFile]]">
-                <multipart-text-form-item has-form-data="[[hasFormDataSupport]]" name="{{item.name}}" value="{{item.value}}" type="{{item.contentType}}" model="[[item]]" required="" auto-validate=""></multipart-text-form-item>
+                <multipart-text-form-item has-form-data="[[hasFormDataSupport]]" name="{{item.name}}"
+                value="{{item.value}}" type="{{item.contentType}}" model="[[item]]" required=""
+                auto-validate=""></multipart-text-form-item>
               </template>
               <span class="delete-action">
-                <paper-icon-button title="Remove parameter" class="action-icon delete-icon" icon="arc:remove-circle-outline" on-tap="_removeCustom"></paper-icon-button>
+                <paper-icon-button title="Remove parameter" class="action-icon delete-icon"
+                  icon="arc:remove-circle-outline" on-click="_removeCustom"></paper-icon-button>
               </span>
             </div>
           </template>
         </form>
       </iron-form>
       <div class="add-actions">
-        <paper-button on-tap="addFile" class="action-button">Add file part</paper-button><paper-button on-tap="addText" class="action-button">Add text part</paper-button>
+        <paper-button class="action-button">Add file part</paper-button>
+        <paper-button on-click="addText" class="action-button">Add text part</paper-button>
       </div>
     </section>
     <section hidden\$="[[!previewOpened]]">
@@ -123,69 +186,12 @@ $_documentContainer.innerHTML = `<dom-module id="multipart-payload-editor">
     <prism-highlighter></prism-highlighter>
     <multipart-payload-transformer></multipart-payload-transformer>
     <clipboard-copy content="[[messagePreview]]"></clipboard-copy>
-    <paper-toast horizontal-align="right"></paper-toast>
-  </template>
-  
-</dom-module>`;
+    <paper-toast horizontal-align="right"></paper-toast>`;
+  }
 
-document.head.appendChild($_documentContainer.content);
-/**
- * Multipart payload editor for ARC/API Console body editor.
- *
- * On supported browsers (full support for FormData, Iterator and ArrayBuffer) it will render a
- * UI controls to generate payload message preview.
- *
- * It produces a FormData object that can be used in XHR / Fetch or transformed to ArrayBuffer to be
- * used in socket connection.
- *
- * ### Example
- * ```html
- * <multipart-payload-editor value="{{form}}"></multipart-payload-editor>
- * ```
- *
- * ## Data model from FormData
- *
- * The element creates a data model for the form view from FormData object.
- * The limitation of this solution is that the information about initial part type
- * is lost. In case when the user specified the part as a text part but also added
- * part content type it will be recognized as the file part.
- *
- * Note: this only works in browsers that support full FormData spec which rules
- * out any Microsoft product. **You have to include polyfills for the FormData.**
- *
- * ### Styling
- *
- * `<multipart-payload-editor>` provides the following custom properties and mixins for styling:
- *
- * Custom property | Description | Default
- * ----------------|-------------|----------
- * `--multipart-payload-editor` | Mixin applied to the element | `{}`
- * `--multipart-payload-editor-code-preview` | Mixin applied to a code preview element | `{}`
- * `--view-action-bar` | Theme mixin, applied to the content action bar | `{}`
- * `--multipart-payload-editor-action-bar` | Mixin applied to the content action bar | `{}`
- * `--body-editor-panel-button-active-background-color` | Background color of the active content action button | `#e0e0e0`
- * `--body-editor-panel-button-active` | Mixin applied to active content action button | `{}`
- * `--content-action-icon-color` | Color of the content action icon | `rgba(0, 0, 0, 0.74)`
- * `--content-action-icon-color-hover` | Color of the content action icon when hovered | `--accent-color` or `rgba(0, 0, 0, 0.74)`
- * `--inline-documentation-color` | Color of the description text from a RAML type. | `rgba(0, 0, 0, 0.87)`
- * `--from-row-action-icon-color` | Color of the icon buttons next to the input fields | `--icon-button-color` or `rgba(0, 0, 0, 0.74)`
- * `--from-row-action-icon-color-hover` | Color of the icon buttons next to the input fields when hovering | `--accent-color` or `rgba(0, 0, 0, 0.74)`,
- * `--multipart-payload-editor-file-trigger-color` | Color of the file dialog trigger button. | `--accent-color` or `#FF5722`
- *
- * This element also inherits styles from
- * `advanced-rest-client/api-form-mixin/api-form-styles.html` element to
- * style form controls.
- *
- * @customElement
- * @polymer
- * @demo demo/simple.html Simple usage
- * @demo demo/raml.html With AMF model from RAML file
- * @appliesMixin Polymer.IronValidatableBehavior
- * @appliesMixin ArcBehaviors.ApiFormMixin
- * @memberof ApiComponents
- */
-class MultipartPayloadEditor extends mixinBehaviors([IronValidatableBehavior], ArcBehaviors.ApiFormMixin(PolymerElement)) {
-  static get is() { return 'multipart-payload-editor'; }
+  static get is() {
+    return 'multipart-payload-editor';
+  }
   static get properties() {
     return {
       /**
@@ -268,6 +274,8 @@ class MultipartPayloadEditor extends mixinBehaviors([IronValidatableBehavior], A
   /**
    * Handler for value change.
    * If the element is opened then it will fire change event.
+   *
+   * @param {FormData} value
    */
   _valueChanged(value) {
     if (!(value instanceof FormData)) {
@@ -289,6 +297,7 @@ class MultipartPayloadEditor extends mixinBehaviors([IronValidatableBehavior], A
    * Sets new model data.
    *
    * @param {FormData} data Form data to be restored.
+   * @return {Promise}
    */
   _restoreFormData(data) {
     if (!this.hasFormDataSupport) {
@@ -560,7 +569,7 @@ class MultipartPayloadEditor extends mixinBehaviors([IronValidatableBehavior], A
       return;
     }
     let hasValue = false;
-    for (var i = 0, len = model.length; i < len; i++) {
+    for (let i = 0, len = model.length; i < len; i++) {
       if (model[i].value) {
         hasValue = true;
       }

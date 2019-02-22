@@ -5,23 +5,22 @@
  *   https://github.com/Polymer/tools/tree/master/packages/gen-typescript-declarations
  *
  * To modify these typings, edit the source file(s):
- *   multipart-text-form-item.html
+ *   multipart-text-form-item.js
  */
 
-/// <reference path="../polymer/types/polymer.d.ts" />
-/// <reference path="../polymer/types/lib/elements/dom-if.d.ts" />
-/// <reference path="../polymer/types/lib/utils/render-status.d.ts" />
-/// <reference path="../iron-validatable-behavior/iron-validatable-behavior.d.ts" />
-/// <reference path="../paper-input/paper-input.d.ts" />
-/// <reference path="../paper-icon-button/paper-icon-button.d.ts" />
-/// <reference path="../paper-autocomplete/paper-autocomplete.d.ts" />
-/// <reference path="../iron-flex-layout/iron-flex-layout.d.ts" />
-/// <reference path="../arc-icons/arc-icons.d.ts" />
-/// <reference path="../api-property-form-item/api-property-form-item.d.ts" />
-/// <reference path="../marked-element/marked-element.d.ts" />
-/// <reference path="../markdown-styles/markdown-styles.d.ts" />
-/// <reference path="../iron-collapse/iron-collapse.d.ts" />
-/// <reference path="../api-form-mixin/api-form-styles.d.ts" />
+
+// tslint:disable:variable-name Describing an API that's defined elsewhere.
+// tslint:disable:no-any describes the API as best we are able today
+
+import {afterNextRender} from '@polymer/polymer/lib/utils/render-status.js';
+
+import {IronValidatableBehavior} from '@polymer/iron-validatable-behavior/iron-validatable-behavior.js';
+
+import {html} from '@polymer/polymer/lib/utils/html-tag.js';
+
+import {mixinBehaviors} from '@polymer/polymer/lib/legacy/class.js';
+
+import {PolymerElement} from '@polymer/polymer/polymer-element.js';
 
 /**
  * A text form item.
@@ -29,9 +28,7 @@
  * If the browser has native support for FormData (and iterators) then it will also render
  * a content type selector for the input field.
  */
-declare class MultipartTextFormItem extends
-  Polymer.IronValidatableBehavior(
-  Object) {
+declare class MultipartTextFormItem {
 
   /**
    * Name of this control
@@ -83,6 +80,9 @@ declare class MultipartTextFormItem extends
   _setAutocompleteTarget(): void;
 }
 
-interface HTMLElementTagNameMap {
-  "multipart-text-form-item": MultipartTextFormItem;
+declare global {
+
+  interface HTMLElementTagNameMap {
+    "multipart-text-form-item": MultipartTextFormItem;
+  }
 }

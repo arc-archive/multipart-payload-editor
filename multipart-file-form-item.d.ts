@@ -5,20 +5,20 @@
  *   https://github.com/Polymer/tools/tree/master/packages/gen-typescript-declarations
  *
  * To modify these typings, edit the source file(s):
- *   multipart-file-form-item.html
+ *   multipart-file-form-item.js
  */
 
-/// <reference path="../polymer/types/polymer-element.d.ts" />
-/// <reference path="../polymer/types/lib/elements/dom-if.d.ts" />
-/// <reference path="../iron-validatable-behavior/iron-validatable-behavior.d.ts" />
-/// <reference path="../paper-input/paper-input.d.ts" />
-/// <reference path="../paper-button/paper-button.d.ts" />
-/// <reference path="../paper-icon-button/paper-icon-button.d.ts" />
-/// <reference path="../iron-flex-layout/iron-flex-layout.d.ts" />
-/// <reference path="../arc-icons/arc-icons.d.ts" />
-/// <reference path="../iron-collapse/iron-collapse.d.ts" />
-/// <reference path="../marked-element/marked-element.d.ts" />
-/// <reference path="../markdown-styles/markdown-styles.d.ts" />
+
+// tslint:disable:variable-name Describing an API that's defined elsewhere.
+// tslint:disable:no-any describes the API as best we are able today
+
+import {PolymerElement} from '@polymer/polymer/polymer-element.js';
+
+import {IronValidatableBehavior} from '@polymer/iron-validatable-behavior/iron-validatable-behavior.js';
+
+import {html} from '@polymer/polymer/lib/utils/html-tag.js';
+
+import {mixinBehaviors} from '@polymer/polymer/lib/legacy/class.js';
 
 /**
  * A file form item.
@@ -76,14 +76,17 @@ declare class MultipartFileFormItem extends
    * A handler to file change event for input[type="file"].
    * This will update files array for corresponding `this.filesList` array object.
    */
-  _fileObjectChanged(e: any): void;
+  _fileObjectChanged(e: Event|null): void;
 
   /**
    * Computes the `accept`attribute for file input.
    */
-  _computeAccept(model: any): any;
+  _computeAccept(model: object|null): String|null;
 }
 
-interface HTMLElementTagNameMap {
-  "multipart-file-form-item": MultipartFileFormItem;
+declare global {
+
+  interface HTMLElementTagNameMap {
+    "multipart-file-form-item": MultipartFileFormItem;
+  }
 }
