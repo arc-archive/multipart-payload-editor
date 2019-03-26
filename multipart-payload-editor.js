@@ -26,7 +26,7 @@ import '@polymer/paper-spinner/paper-spinner.js';
 import '@polymer/paper-toast/paper-toast.js';
 import '@api-components/api-form-mixin/api-form-styles.js';
 import '@advanced-rest-client/multipart-payload-transformer/multipart-payload-transformer.js';
-import '@api-components/clipboard-copy/clipboard-copy.js';
+import '@advanced-rest-client/clipboard-copy/clipboard-copy.js';
 import '@polymer/prism-element/prism-import.js';
 import '@polymer/prism-element/prism-highlighter.js';
 import '@polymer/prism-element/prism-theme-default.js';
