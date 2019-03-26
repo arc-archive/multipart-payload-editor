@@ -17,20 +17,20 @@
   "license": "Apache-2.0",
   "devDependencies": {
     "@polymer/gen-typescript-declarations": "^1.6.1",
-    "@polymer/iron-demo-helpers": "^3.0.0",
-    "@webcomponents/webcomponentsjs": "^2.0.0",
     "@polymer/iron-component-page": "^4.0.0",
+    "@polymer/iron-demo-helpers": "^3.1.0",
     "@polymer/iron-test-helpers": "^3.0.0",
-    "@polymer/paper-dropdown-menu": "^3.0.0",
-    "@polymer/paper-listbox": "^3.0.0",
-    "@polymer/paper-item": "^3.0.0",
     "@polymer/paper-checkbox": "^3.0.0",
-    "web-animations-js": "^2.3.1",
+    "@polymer/paper-dropdown-menu": "^3.0.0",
+    "@polymer/paper-item": "^3.0.0",
+    "@polymer/paper-listbox": "^3.0.0",
     "@polymer/test-fixture": "^4.0.2",
+    "@webcomponents/webcomponentsjs": "^2.0.0",
     "chai": "^4.2.0",
     "mocha": "^5.2.0",
-    "sinon": "^7.2.3",
-    "wct-mocha": "^1.0.0"
+    "sinon": "^7.3.0",
+    "wct-mocha": "^1.0.0",
+    "web-animations-js": "^2.3.1"
   },
   "authors": [
     "Pawel Psztyc",
@@ -52,10 +52,10 @@
     "The Advanced REST client authors <arc@mulesoft.com>"
   ],
   "dependencies": {
-    "@advanced-rest-client/arc-icons": "^3.0.0-preview.1",
+    "@advanced-rest-client/arc-icons": "^3.0.0-preview.2",
     "@advanced-rest-client/markdown-styles": "^3.0.0-preview.1",
     "@advanced-rest-client/multipart-payload-transformer": "^3.0.0-preview.1",
-    "@advanced-rest-client/paper-autocomplete": "^3.0.0-preview.1",
+    "@advanced-rest-client/paper-autocomplete": "^3.0.0-preview.2",
     "@api-components/api-form-mixin": "^3.0.0-preview.1",
     "@api-components/api-property-form-item": "^3.0.0-preview.1",
     "@api-components/api-view-model-transformer": "^3.0.0-preview.1",
@@ -68,9 +68,9 @@
     "@polymer/paper-button": "^3.0.0",
     "@polymer/paper-icon-button": "^3.0.0",
     "@polymer/paper-input": "^3.0.0",
-    "@polymer/paper-spinner": "^3.0.0",
+    "@polymer/paper-spinner": "^3.0.2",
     "@polymer/paper-toast": "^3.0.0",
-    "@polymer/polymer": "^3.0.0",
+    "@polymer/polymer": "^3.2.0",
     "@polymer/prism-element": "^3.0.0"
   }
 }
