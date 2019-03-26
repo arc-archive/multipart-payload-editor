@@ -11,26 +11,24 @@ WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 License for the specific language governing permissions and limitations under
 the License.
 */
-import {PolymerElement} from '@polymer/polymer/polymer-element.js';
-import {IronValidatableBehavior} from '@polymer/iron-validatable-behavior/iron-validatable-behavior.js';
-import {mixinBehaviors} from '@polymer/polymer/lib/legacy/class.js';
-import {html} from '@polymer/polymer/lib/utils/html-tag.js';
-import {ApiFormMixin} from '@api-components/api-form-mixin/api-form-mixin.js';
-import '@polymer/polymer/lib/elements/dom-if.js';
-import '@polymer/polymer/lib/elements/dom-repeat.js';
-import '@advanced-rest-client/arc-icons/arc-icons.js';
-import '@polymer/iron-form/iron-form.js';
-import '@polymer/iron-flex-layout/iron-flex-layout.js';
-import '@polymer/paper-icon-button/paper-icon-button.js';
-import '@polymer/paper-spinner/paper-spinner.js';
-import '@polymer/paper-toast/paper-toast.js';
-import '@api-components/api-form-mixin/api-form-styles.js';
-import '@advanced-rest-client/multipart-payload-transformer/multipart-payload-transformer.js';
-import '@advanced-rest-client/clipboard-copy/clipboard-copy.js';
-import '@polymer/prism-element/prism-import.js';
-import '@polymer/prism-element/prism-highlighter.js';
-import '@polymer/prism-element/prism-theme-default.js';
-import 'prismjs/components/prism-http.js';
+import {PolymerElement} from '../../@polymer/polymer/polymer-element.js';
+import {IronValidatableBehavior} from '../../@polymer/iron-validatable-behavior/iron-validatable-behavior.js';
+import {mixinBehaviors} from '../../@polymer/polymer/lib/legacy/class.js';
+import {html} from '../../@polymer/polymer/lib/utils/html-tag.js';
+import {ApiFormMixin} from '../../@api-components/api-form-mixin/api-form-mixin.js';
+import '../../@advanced-rest-client/arc-icons/arc-icons.js';
+import '../../@polymer/iron-form/iron-form.js';
+import '../../@polymer/iron-flex-layout/iron-flex-layout.js';
+import '../../@polymer/paper-icon-button/paper-icon-button.js';
+import '../../@polymer/paper-spinner/paper-spinner.js';
+import '../../@polymer/paper-toast/paper-toast.js';
+import '../../@api-components/api-form-mixin/api-form-styles.js';
+import '../../@advanced-rest-client/multipart-payload-transformer/multipart-payload-transformer.js';
+import '../../@advanced-rest-client/clipboard-copy/clipboard-copy.js';
+import '../../@polymer/prism-element/prism-import.js';
+import '../../@polymer/prism-element/prism-highlighter.js';
+import '../../@polymer/prism-element/prism-theme-default.js';
+import '../../prismjs/components/prism-http.js';
 import './multipart-text-form-item.js';
 import './multipart-file-form-item.js';
 /**

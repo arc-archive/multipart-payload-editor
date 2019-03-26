@@ -11,22 +11,21 @@ WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 License for the specific language governing permissions and limitations under
 the License.
 */
-import {afterNextRender} from '@polymer/polymer/lib/utils/render-status.js';
-import {IronValidatableBehavior} from '@polymer/iron-validatable-behavior/iron-validatable-behavior.js';
-import {html} from '@polymer/polymer/lib/utils/html-tag.js';
-import {mixinBehaviors} from '@polymer/polymer/lib/legacy/class.js';
-import {PolymerElement} from '@polymer/polymer/polymer-element.js';
-import '@polymer/polymer/lib/elements/dom-if.js';
-import '@polymer/paper-input/paper-input.js';
-import '@polymer/paper-icon-button/paper-icon-button.js';
-import '@advanced-rest-client/paper-autocomplete/paper-autocomplete.js';
-import '@polymer/iron-flex-layout/iron-flex-layout.js';
-import '@advanced-rest-client/arc-icons/arc-icons.js';
-import '@api-components/api-property-form-item/api-property-form-item.js';
-import '@polymer/marked-element/marked-element.js';
-import '@advanced-rest-client/markdown-styles/markdown-styles.js';
-import '@polymer/iron-collapse/iron-collapse.js';
-import '@api-components/api-form-mixin/api-form-styles.js';
+import {afterNextRender} from '../../@polymer/polymer/lib/utils/render-status.js';
+import {IronValidatableBehavior} from '../../@polymer/iron-validatable-behavior/iron-validatable-behavior.js';
+import {html} from '../../@polymer/polymer/lib/utils/html-tag.js';
+import {mixinBehaviors} from '../../@polymer/polymer/lib/legacy/class.js';
+import {PolymerElement} from '../../@polymer/polymer/polymer-element.js';
+import '../../@polymer/paper-input/paper-input.js';
+import '../../@polymer/paper-icon-button/paper-icon-button.js';
+import '../../@advanced-rest-client/paper-autocomplete/paper-autocomplete.js';
+import '../../@polymer/iron-flex-layout/iron-flex-layout.js';
+import '../../@advanced-rest-client/arc-icons/arc-icons.js';
+import '../../@api-components/api-property-form-item/api-property-form-item.js';
+import '../../@polymer/marked-element/marked-element.js';
+import '../../@advanced-rest-client/markdown-styles/markdown-styles.js';
+import '../../@polymer/iron-collapse/iron-collapse.js';
+import '../../@api-components/api-form-mixin/api-form-styles.js';
 /**
  * A text form item.
  *
