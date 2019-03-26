@@ -13,7 +13,7 @@
     "url": "git://github.com/advanced-rest-client/multipart-payload-editor.git"
   },
   "name": "@advanced-rest-client/multipart-payload-editor",
-  "version": "3.0.0-preview.1",
+  "version": "3.0.0-preview.2",
   "license": "Apache-2.0",
   "devDependencies": {
     "@api-components/api-model-generator": "^0.1.10",
