@@ -21,7 +21,6 @@ import prismStyles from '@advanced-rest-client/prism-highlight/prism-styles.js';
 import '@advanced-rest-client/arc-icons/arc-icons.js';
 import '@polymer/iron-form/iron-form.js';
 import '@anypoint-web-components/anypoint-button/anypoint-icon-button.js';
-import '@polymer/paper-spinner/paper-spinner.js';
 import '@polymer/paper-toast/paper-toast.js';
 import '@advanced-rest-client/multipart-payload-transformer/multipart-payload-transformer.js';
 import '@advanced-rest-client/clipboard-copy/clipboard-copy.js';
