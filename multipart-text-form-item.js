@@ -11,21 +11,16 @@ WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 License for the specific language governing permissions and limitations under
 the License.
 */
-import {afterNextRender} from '../../@polymer/polymer/lib/utils/render-status.js';
-import {IronValidatableBehavior} from '../../@polymer/iron-validatable-behavior/iron-validatable-behavior.js';
-import {html} from '../../@polymer/polymer/lib/utils/html-tag.js';
-import {mixinBehaviors} from '../../@polymer/polymer/lib/legacy/class.js';
-import {PolymerElement} from '../../@polymer/polymer/polymer-element.js';
-import '../../@polymer/paper-input/paper-input.js';
-import '../../@polymer/paper-icon-button/paper-icon-button.js';
-import '../../@advanced-rest-client/paper-autocomplete/paper-autocomplete.js';
-import '../../@polymer/iron-flex-layout/iron-flex-layout.js';
-import '../../@advanced-rest-client/arc-icons/arc-icons.js';
-import '../../@api-components/api-property-form-item/api-property-form-item.js';
-import '../../@polymer/marked-element/marked-element.js';
-import '../../@advanced-rest-client/markdown-styles/markdown-styles.js';
-import '../../@polymer/iron-collapse/iron-collapse.js';
-import '../../@api-components/api-form-mixin/api-form-styles.js';
+import { html, css, LitElement } from 'lit-element';
+import { ValidatableMixin } from '@anypoint-web-components/validatable-mixin/validatable-mixin.js';
+import markdownStyles from '@advanced-rest-client/markdown-styles/markdown-styles.js';
+import formStyles from '@api-components/api-form-mixin/api-form-styles.js';
+import '@advanced-rest-client/arc-marked/arc-marked.js';
+import '@advanced-rest-client/arc-icons/arc-icons.js';
+import '@anypoint-web-components/anypoint-button/anypoint-icon-button.js';
+import '@anypoint-web-components/anypoint-input/anypoint-input.js';
+import '@api-components/api-property-form-item/api-property-form-item.js';
+
 /**
  * A text form item.
  *
@@ -33,144 +28,169 @@ import '../../@api-components/api-form-mixin/api-form-styles.js';
  * a content type selector for the input field.
  *
  * @customElement
- * @polymer
  * @demo demo/index.html
- * @polymerBehavior Polymer.IronValidatableBehavior
+ * @appliesMixin ValidatableMixin
  */
-class MultipartTextFormItem extends mixinBehaviors([IronValidatableBehavior], PolymerElement) {
-  static get template() {
+class MultipartTextFormItem extends ValidatableMixin(LitElement) {
+  static get styles() {
+    return [
+      markdownStyles,
+      formStyles,
+      css`:host {
+        display: block;
+        flex: 1;
+      }
+
+      .multipart-item {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+      }
+
+      .mime-selector {
+        position: relative;
+      }
+
+      .value-selector {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+      }
+
+      api-property-form-item {
+        flex: 1;
+        margin-left: 12px;
+      }
+
+      .mime-selector anypoint-input {
+        max-width: 360px;
+      }
+
+      .name-field {
+        max-width: 360px;
+        flex: 1;
+      }`
+    ];
+  }
+
+  render() {
+    const {
+      hasFormData,
+      type,
+      name,
+      value,
+      model,
+      docsOpened,
+      readOnly,
+      disabled,
+      legacy,
+      outlined,
+    } = this;
     return html`
-    <style include="markdown-styles"></style>
-    <style include="api-form-styles"></style>
-    <style>
-    :host {
-      display: block;
-      @apply --layout-flex;
-    }
-
-    .multipart-item {
-      @apply --layout-vertical;
-      @apply --layout-flex;
-    }
-
-    .mime-selector {
-      position: relative;
-    }
-
-    .value-selector {
-      @apply --layout-horizontal;
-      @apply --layout-center;
-    }
-
-    api-property-form-item {
-      @apply --layout-flex;
-      margin-left: 12px;
-    }
-
-    .mime-selector paper-input {
-      max-width: 360px;
-    }
-
-    .name-field {
-      max-width: 360px;
-      @apply --layout-flex;
-    }
-
-    paper-autocomplete {
-      top: 34px;
-    }
-    </style>
     <div class="multipart-item">
-      <template is="dom-if" if="[[hasFormData]]">
-        <div class="mime-selector">
-          <paper-input label="Content type (Optional)" value="{{type}}" no-label-float=""></paper-input>
-          <paper-autocomplete target="[[_mimeInput]]" source="[[suggestions]]" open-on-focus=""></paper-autocomplete>
-        </div>
-      </template>
+      ${hasFormData ? html`<div class="mime-selector">
+        <anypoint-input
+          .value="${type}"
+          @value-changed="${this._typeHandler}"
+          nolabelfloat
+          type="text"
+          ?outlined="${outlined}"
+          ?legacy="${legacy}"
+          .readOnly="${readOnly}"
+          .disabled=${disabled}
+        >
+          <label slot="label">Content type (Optional)</label>
+        </anypoint-input>
+      </div>` : undefined}
+
       <div class="value-selector">
-        <paper-input class="name-field" label="Field name" error-message="The name is required"
-          required="" auto-validate="" value="{{name}}" no-label-float=""></paper-input>
-        <api-property-form-item model="[[model]]" name="[[name]]" value="{{value}}"
-          no-label-float=""></api-property-form-item>
-        <template is="dom-if" if="[[model.hasDescription]]">
-          <paper-icon-button class="hint-icon" icon="arc:help" on-click="toggleDocumentation"
-            title="Display documentation"></paper-icon-button>
-        </template>
+        <anypoint-input
+          class="name-field"
+          invalidmessage="The name is required"
+          required
+          autovalidate
+          .value="${name}"
+          @value-changed="${this._nameHandler}"
+          nolabelfloat
+          ?outlined="${outlined}"
+          ?legacy="${legacy}"
+          .readOnly="${readOnly}"
+          .disabled=${disabled}
+          >
+            <label slot="label">Field name</label>
+        </anypoint-input>
+        <api-property-form-item
+          .model="${model}"
+          name="${name}"
+          .value="${value}"
+          @value-changed="${this._valueHandler}"
+          nolabelfloat
+          ?outlined="${outlined}"
+          ?legacy="${legacy}"
+          .readOnly="${readOnly}"
+          .disabled=${disabled}
+        ></api-property-form-item>
+        ${model.hasDescription ? html`<anypoint-icon-button
+          class="hint-icon"
+          title="Toggle documentation"
+          ?outlined="${outlined}"
+          ?legacy="${legacy}"
+          ?disabled="${disabled}"
+          @click="${this.toggleDocumentation}">
+          <iron-icon icon="arc:help"></iron-icon>
+        </anypoint-icon-button>` : undefined}
       </div>
     </div>
-    <template is="dom-if" if="[[model.hasDescription]]" restamp="">
-      <div class="docs">
-        <iron-collapse opened="[[docsOpened]]">
-          <marked-element markdown="[[model.description]]">
-            <div slot="markdown-html" class="markdown-body"></div>
-          </marked-element>
-        </iron-collapse>
-      </div>
-    </template>
-`;
+
+    ${docsOpened && model.hasDescription ? html`<div class="docs">
+      <arc-marked .markdown="${model.description}">
+        <div slot="markdown-html" class="markdown-body"></div>
+      </arc-marked>
+    </div>` : undefined}`;
   }
 
-  static get is() {
-    return 'multipart-text-form-item';
-  }
   static get properties() {
     return {
       /**
        * Name of this control
        */
-      name: {
-        type: String,
-        notify: true
-      },
+      name: { type: String },
       /**
        * Valuie of this control.
        */
-      value: {
-        type: String,
-        notify: true
-      },
+      value: { type: String },
       /**
        * A view model.
        */
-      model: Object,
+      model: { type: Object },
       /**
        * True to render documentation (if set in model)
        */
-      docsOpened: Boolean,
+      docsOpened: { type: Boolean },
       /**
-       * Reference to the mime type input
+       * A content type of the form field to be presented in the Multipart request.
        */
-      _mimeInput: {
-        type: HTMLElement
-      },
-      // A content type of the form field to be presented in the Multipart request.
-      type: {
-        type: String,
-        notify: true
-      },
-      // List of suggested mime types
-      suggestions: {
-        type: Array,
-        value: function() {
-          return [
-            'multipart-form-data',
-            'application/x-www-form-urlencoded',
-            'application/json',
-            'application/xml',
-            'application/base64',
-            'application/octet-stream',
-            'text/plain',
-            'text/css',
-            'text/html',
-            'application/javascript'
-          ];
-        }
-      },
-      // If set it will also renders mime type selector for the input data.
-      hasFormData: {
-        type: Boolean,
-        observer: '_hasFormDataChanged'
-      }
+      type: { type: String },
+      /**
+       * When set it will also renders mime type selector for the input data.
+       */
+      hasFormData: { type: Boolean },
+      /**
+       * Enables Anypoint legacy styling
+       */
+      legacy: { type: Boolean },
+      /**
+       * Enables Material Design outlined style
+       */
+      outlined: { type: Boolean },
+      /**
+       * When set the editor is in read only mode.
+       */
+      readOnly: { type: Boolean },
+      /**
+       * When set all controls are disabled in the form
+       */
+      disabled: { type: Boolean }
     };
   }
   /**
@@ -180,29 +200,33 @@ class MultipartTextFormItem extends mixinBehaviors([IronValidatableBehavior], Po
     this.docsOpened = !this.docsOpened;
   }
 
-  ready() {
-    super.ready();
-    if (this.hasFormData) {
-      this._setAutocompleteTarget();
-    }
-  }
-
   _getValidity() {
     return !!(this.name && this.value);
   }
 
-  _hasFormDataChanged(hasFormData) {
-    if (hasFormData) {
-      this._setAutocompleteTarget();
-    } else {
-      this.set('_mimeInput', undefined);
-    }
+  _typeHandler(e) {
+    this._changeHandler('type', e);
   }
 
-  _setAutocompleteTarget() {
-    afterNextRender(this, () => {
-      this.set('_mimeInput', this.shadowRoot.querySelector('.mime-selector paper-input'));
-    });
+  _nameHandler(e) {
+    this._changeHandler('name', e);
+  }
+
+  _valueHandler(e) {
+    this._changeHandler('value', e);
+  }
+
+  _changeHandler(prop, e) {
+    const { value } = e.detail;
+    if (this[prop] === value) {
+      return;
+    }
+    this[prop] = value;
+    this.dispatchEvent(new CustomEvent(`${prop}-changed`, {
+      detail: {
+        value
+      }
+    }));
   }
 }
-window.customElements.define(MultipartTextFormItem.is, MultipartTextFormItem);
+window.customElements.define('multipart-text-form-item', MultipartTextFormItem);

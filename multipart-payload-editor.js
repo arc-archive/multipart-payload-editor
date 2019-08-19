@@ -11,26 +11,34 @@ WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 License for the specific language governing permissions and limitations under
 the License.
 */
-import {PolymerElement} from '../../@polymer/polymer/polymer-element.js';
-import {IronValidatableBehavior} from '../../@polymer/iron-validatable-behavior/iron-validatable-behavior.js';
-import {mixinBehaviors} from '../../@polymer/polymer/lib/legacy/class.js';
-import {html} from '../../@polymer/polymer/lib/utils/html-tag.js';
-import {ApiFormMixin} from '../../@api-components/api-form-mixin/api-form-mixin.js';
-import '../../@advanced-rest-client/arc-icons/arc-icons.js';
-import '../../@polymer/iron-form/iron-form.js';
-import '../../@polymer/iron-flex-layout/iron-flex-layout.js';
-import '../../@polymer/paper-icon-button/paper-icon-button.js';
-import '../../@polymer/paper-spinner/paper-spinner.js';
-import '../../@polymer/paper-toast/paper-toast.js';
-import '../../@api-components/api-form-mixin/api-form-styles.js';
-import '../../@advanced-rest-client/multipart-payload-transformer/multipart-payload-transformer.js';
-import '../../@advanced-rest-client/clipboard-copy/clipboard-copy.js';
-import '../../@polymer/prism-element/prism-import.js';
-import '../../@polymer/prism-element/prism-highlighter.js';
-import '../../@polymer/prism-element/prism-theme-default.js';
-import '../../prismjs/components/prism-http.js';
+import { html, css, LitElement } from 'lit-element';
+import { ValidatableMixin } from '@anypoint-web-components/validatable-mixin/validatable-mixin.js';
+import {ApiFormMixin} from '@api-components/api-form-mixin/api-form-mixin.js';
+import formStyles from '@api-components/api-form-mixin/api-form-styles.js';
+import prismStyles from '@advanced-rest-client/prism-highlight/prism-styles.js';
+import '@advanced-rest-client/arc-icons/arc-icons.js';
+import '@polymer/iron-form/iron-form.js';
+import '@anypoint-web-components/anypoint-button/anypoint-icon-button.js';
+import '@polymer/paper-spinner/paper-spinner.js';
+import '@polymer/paper-toast/paper-toast.js';
+import '@advanced-rest-client/multipart-payload-transformer/multipart-payload-transformer.js';
+import '@advanced-rest-client/clipboard-copy/clipboard-copy.js';
+
+import '@polymer/prism-element/prism-import.js';
+import '@polymer/prism-element/prism-highlighter.js';
+import '@polymer/prism-element/prism-theme-default.js';
+import 'prismjs/components/prism-http.js';
+
 import './multipart-text-form-item.js';
 import './multipart-file-form-item.js';
+export let hasFormDataSupport;
+try {
+  const fd = new FormData();
+  fd.append('test', new Blob(['.'], {type: 'image/jpg'}), 'test.jpg');
+  hasFormDataSupport = ('entries' in fd);
+} catch (e) {
+  hasFormDataSupport = false;
+}
 /**
  * Multipart payload editor for ARC/API Console body editor.
  *
@@ -55,141 +63,186 @@ import './multipart-file-form-item.js';
  * Note: this only works in browsers that support full FormData spec which rules
  * out any Microsoft product. **You have to include polyfills for the FormData.**
  *
- * ### Styling
- *
- * `<multipart-payload-editor>` provides the following custom properties and mixins for styling:
- *
- * Custom property | Description | Default
- * ----------------|-------------|----------
- * `--multipart-payload-editor` | Mixin applied to the element | `{}`
- * `--multipart-payload-editor-code-preview` | Mixin applied to a code preview element | `{}`
- * `--view-action-bar` | Theme mixin, applied to the content action bar | `{}`
- * `--multipart-payload-editor-action-bar` | Mixin applied to the content action bar | `{}`
- * `--body-editor-panel-button-active-background-color` | Background color of the active content action button | `#e0e0e0`
- * `--body-editor-panel-button-active` | Mixin applied to active content action button | `{}`
- * `--content-action-icon-color` | Color of the content action icon | `rgba(0, 0, 0, 0.74)`
- * `--content-action-icon-color-hover` | Color of the content action icon when hovered | `--accent-color` or `rgba(0, 0, 0, 0.74)`
- * `--inline-documentation-color` | Color of the description text from a RAML type. | `rgba(0, 0, 0, 0.87)`
- * `--from-row-action-icon-color` | Color of the icon buttons next to the input fields | `--icon-button-color` or `rgba(0, 0, 0, 0.74)`
- * `--from-row-action-icon-color-hover` | Color of the icon buttons next to the input fields when hovering | `--accent-color` or `rgba(0, 0, 0, 0.74)`,
- * `--multipart-payload-editor-file-trigger-color` | Color of the file dialog trigger button. | `--accent-color` or `#FF5722`
- *
- * This element also inherits styles from
- * `advanced-rest-client/api-form-mixin/api-form-styles.html` element to
- * style form controls.
  *
  * @customElement
- * @polymer
- * @demo demo/simple.html Simple usage
- * @demo demo/raml.html With AMF model from RAML file
- * @polymerBehavior Polymer.IronValidatableBehavior
+ * @demo demo/index.html
+ * @appliesMixin ValidatableMixin
  * @appliesMixin ApiFormMixin
  * @memberof ApiComponents
  */
-class MultipartPayloadEditor extends mixinBehaviors([IronValidatableBehavior], ApiFormMixin(PolymerElement)) {
-  static get template() {
-    return html`<style include="prism-theme-default"></style>
-    <style include="api-form-styles"></style>
-    <style>
-    :host {
-      display: block;
-      @apply --multipart-payload-editor;
-    }
+class MultipartPayloadEditor extends ApiFormMixin(ValidatableMixin(LitElement)) {
+  static get styles() {
+    return [
+      prismStyles,
+      formStyles,
+      css`:host {
+        display: block;
+      }
 
-    [hidden] {
-      display: none !important;
-    }
+      [hidden] {
+        display: none !important;
+      }
 
-    .form-item {
-      @apply --layout-horizontal;
-      margin: 8px 0;
-    }
+      .form-item {
+        display: flex;
+        flex-direction: row;
+        margin: 8px 0;
+      }
 
-    .delete-action {
-      display: block;
-      margin-top: 20px;
-    }
+      .delete-action {
+        display: block;
+        margin-top: 20px;
+      }
 
-    .form-item:not([data-file]) .delete-action {
-      margin-top: 42px;
-    }
+      .form-item:not([data-file]) .delete-action {
+        margin-top: 42px;
+      }
 
-    multipart-text-form-item,
-    multipart-file-form-item {
-      margin-bottom: 8px;
-    }
+      multipart-text-form-item,
+      multipart-file-form-item {
+        margin-bottom: 8px;
+      }
 
-    code {
-      @apply --arc-font-code1;
-      white-space: pre-line;
-      word-break: break-all;
-      overflow: auto;
-      @apply --multipart-payload-editor-code-preview;
-    }
+      code {
+        font-family: var(--arc-font-code-family);
+        white-space: pre-line;
+        word-break: break-all;
+        overflow: auto;
+      }
 
-    .editor-actions {
-      @apply --layout-horizontal;
-      @apply --layout-center;
-      @apply --view-action-bar;
-      @apply --multipart-payload-editor-action-bar;
-    }
+      .editor-actions {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+      }`
+    ];
+  }
 
-    paper-icon-button[active] {
-      background-color: var(--body-editor-panel-button-active-background-color, #e0e0e0);
-      border-radius: 50%;
-      @apply --body-editor-panel-button-active;
-    }
-    </style>
-    <template is="dom-if" if="[[hasFormDataSupport]]">
-      <div class="editor-actions">
-        <paper-icon-button id="previewIcon" icon="[[_computeToggleIcon(previewOpened)]]"
-          class="action-icon" toggles="" active="{{previewOpened}}" disabled="[[generatingPreview]]"
-          title="Toggles generated payload message preview"></paper-icon-button>
-        <paper-icon-button id="copyIcon" icon="arc:content-copy" class="action-icon"
-          on-click="_copyToClipboard" disabled="[[generatingPreview]]" hidden\$="[[!previewOpened]]"
-          title="Copy payload message"></paper-icon-button>
-        <paper-spinner alt="Loading preview" active="[[generatingPreview]]"></paper-spinner>
-      </div>
-    </template>
-    <section hidden\$="[[previewOpened]]">
+  _previewTemplate(messagePreview) {
+    return html`<code>${messagePreview}</code>`;
+  }
+
+  _formItemTemplate(item, index) {
+    const {
+      readOnly,
+      disabled,
+      legacy,
+      outlined,
+    } = this;
+    return html`<div class="form-item" data-file="${item.schema.isFile}">
+    ${item.schema.isFile ?
+      html`<multipart-file-form-item
+        data-index="${index}"
+        .name="${item.name}"
+        @name-changed="${this._nameChangeHandler}"
+        .value="${item.value}"
+        @value-changed="${this._valueChangeHandler}"
+        .model="${item}"
+        .outlined="${outlined}"
+        .legacy="${legacy}"
+        .readOnly="${readOnly}"
+        .disabled=${disabled}
+        ></multipart-file-form-item>` :
+      html`<multipart-text-form-item
+        .hasFormData="${hasFormDataSupport}"
+        data-index="${index}"
+        .name="${item.name}"
+        @name-changed="${this._nameChangeHandler}"
+        .value="${item.value}"
+        @value-changed="${this._valueChangeHandler}"
+        .type="${item.contentType}"
+        @type-changed="${this._typeChangeHandler}"
+        .model="${item}"
+        .outlined="${outlined}"
+        .legacy="${legacy}"
+        .readOnly="${readOnly}"
+        .disabled=${disabled}></multipart-text-form-item>`}
+
+      <span class="delete-action">
+        <anypoint-icon-button
+          title="Remove this parameter"
+          aria-label="Press to remove parameter ${item.name}"
+          class="action-icon delete-icon"
+          data-index="${index}"
+          @click="${this._removeCustom}"
+          slot="suffix"
+          ?disabled="${readOnly || disabled}"
+          ?outlined="${outlined}"
+          ?legacy="${legacy}">
+          <iron-icon icon="arc:remove-circle-outline"></iron-icon>
+        </anypoint-icon-button>
+      </span>
+    </div>`;
+  }
+
+  _formTemplate() {
+    const {
+      readOnly,
+      disabled,
+    } = this;
+    const model = this.model || [];
+    return html`
       <iron-form>
         <form enctype="multipart/form-data" method="post">
-          <template is="dom-repeat" id="list" items="{{model}}" observe="value">
-            <div class="form-item" data-file\$="[[item.schema.isFile]]">
-              <template is="dom-if" if="[[item.schema.isFile]]">
-                <multipart-file-form-item name="{{item.name}}" value="{{item.value}}"
-                  model="[[item]]" required="" auto-validate=""></multipart-file-form-item>
-              </template>
-              <template is="dom-if" if="[[!item.schema.isFile]]">
-                <multipart-text-form-item has-form-data="[[hasFormDataSupport]]" name="{{item.name}}"
-                value="{{item.value}}" type="{{item.contentType}}" model="[[item]]" required=""
-                auto-validate=""></multipart-text-form-item>
-              </template>
-              <span class="delete-action">
-                <paper-icon-button title="Remove parameter" class="action-icon delete-icon"
-                  icon="arc:remove-circle-outline" on-click="_removeCustom"></paper-icon-button>
-              </span>
-            </div>
-          </template>
+          ${model.map((item, index) => this._formItemTemplate(item, index))}
         </form>
       </iron-form>
       <div class="add-actions">
-        <paper-button class="action-button">Add file part</paper-button>
-        <paper-button on-click="addText" class="action-button">Add text part</paper-button>
-      </div>
+        <anypoint-button
+          class="action-button"
+          @click="${this.addFile}"
+          ?disabled="${disabled || readOnly}"
+          emphasis="medium">Add file part</anypoint-button>
+        <anypoint-button
+          class="action-button"
+          @click="${this.addText}"
+          ?disabled="${disabled || readOnly}"
+          emphasis="medium">Add text part</anypoint-button>
+      </div>`;
+  }
+
+  render() {
+    const {
+      previewOpened,
+      generatingPreview,
+      messagePreview
+    } = this;
+    return html`
+    ${hasFormDataSupport ? html`<div class="editor-actions">
+      <anypoint-button
+        part="content-action-button, code-content-action-button"
+        class="action-button"
+        data-action="copy"
+        emphasis="medium"
+        toggles
+        .active="${previewOpened}"
+        @active-changed="${this._previewHandler}"
+        aria-label="Press to toggle payload preview"
+        title="Toggles generated payload message preview"
+        ?disabled="${generatingPreview}">Preview</anypoint-button>
+      <anypoint-button
+        part="content-action-button, code-content-action-button"
+        class="action-button"
+        data-action="copy"
+        emphasis="medium"
+        @click="${this._copyToClipboard}"
+        aria-label="Press to copy payload to clipboard"
+        title="Copy payload to clipboard"
+        ?disabled="${generatingPreview}">Copy</anypoint-button>
+      <paper-spinner alt="Loading preview" .active="${generatingPreview}"></paper-spinner>
+    </div>` : undefined}
+
+    <section>
+    ${previewOpened ? this._previewTemplate(messagePreview) : this._formTemplate()}
     </section>
-    <section hidden\$="[[!previewOpened]]">
-      <code></code>
-    </section>
+
     <prism-highlighter></prism-highlighter>
     <multipart-payload-transformer></multipart-payload-transformer>
-    <clipboard-copy content="[[messagePreview]]"></clipboard-copy>
+    <clipboard-copy .content="${messagePreview}"></clipboard-copy>
     <paper-toast horizontal-align="right"></paper-toast>`;
   }
 
-  static get is() {
-    return 'multipart-payload-editor';
-  }
+
   static get properties() {
     return {
       /**
@@ -197,47 +250,68 @@ class MultipartPayloadEditor extends mixinBehaviors([IronValidatableBehavior], A
        *
        * @type {FormData}
        */
-      value: {
-        type: Object,
-        notify: true,
-        observer: '_valueChanged'
-      },
-      /**
-       * True if the browser has native FormData support.
-       */
-      hasFormDataSupport: {
-        type: Boolean,
-        value: function() {
-          try {
-            const fd = new FormData();
-            fd.append('test', new Blob(['.'], {type: 'image/jpg'}), 'test.jpg');
-            return ('entries' in fd);
-          } catch (e) {
-            return false;
-          }
-        }
-      },
+      value: { type: Object },
+
       // true if the message preview is opened
-      previewOpened: {
-        type: Boolean,
-        value: false,
-        observer: '_previewOpenedChanged'
-      },
+      previewOpened: { type: Boolean },
       // true if the transformer is generating the message
-      generatingPreview: Boolean,
+      generatingPreview: { type: Boolean },
       // Generated body message preview
-      messagePreview: String
+      messagePreview: { type: String },
+      /**
+       * Enables Anypoint legacy styling
+       */
+      legacy: { type: Boolean },
+      /**
+       * Enables Material Design outlined style
+       */
+      outlined: { type: Boolean },
+      /**
+       * When set the editor is in read only mode.
+       */
+      readOnly: { type: Boolean },
+      /**
+       * When set all controls are disabled in the form
+       */
+      disabled: { type: Boolean }
     };
   }
 
-  static get observers() {
-    return [
-      '_modelChanged(model.*)'
-    ];
+  get model() {
+    return this._model;
   }
 
-  ready() {
-    super.ready();
+  set model(value) {
+    if (this._sop('model', value)) {
+      this._notifyChanged('model', value);
+      this.renderEmptyMessage = this._computeRenderEmptyMessage(this.allowCustom, value);
+      this.hasOptional = this._computeHasOptionalParameters(this.allowHideOptional, value);
+      this._modelChanged(value);
+    }
+  }
+
+  get value() {
+    return this._value;
+  }
+
+  set value(value) {
+    if (this._sop('value', value)) {
+      this._notifyChanged('value', value);
+      this._valueChanged(value);
+    }
+  }
+
+  get previewOpened() {
+    return this._previewOpened;
+  }
+
+  set previewOpened(value) {
+    if (this._sop('previewOpened', value)) {
+      this._previewOpenedChanged(value);
+    }
+  }
+
+  firstUpdated() {
     if (!this.model) {
       this.addFile();
     }
@@ -251,8 +325,10 @@ class MultipartPayloadEditor extends mixinBehaviors([IronValidatableBehavior], A
       inputLabel: 'Property value'
     });
     const index = this.model.length - 1;
-    this.set(`model.${index}.schema.isFile`, true);
-    this.set(`model.${index}.schema.type`, 'file');
+    const item = this.model[index];
+    item.schema.isFile = true;
+    item.schema.type = 'file';
+    this.requestUpdate();
   }
   /**
    * Appends empty text field to the form.
@@ -263,11 +339,13 @@ class MultipartPayloadEditor extends mixinBehaviors([IronValidatableBehavior], A
       inputLabel: 'Property value'
     });
     const index = this.model.length - 1;
-    this.set(`model.${index}.schema.isFile`, false);
-    this.set(`model.${index}.schema.type`, 'string');
-    if (this.hasFormDataSupport) {
-      this.set(`model.${index}.contentType`, '');
+    const item = this.model[index];
+    item.schema.isFile = false;
+    item.schema.type = 'string';
+    if (hasFormDataSupport) {
+      item.contentType = '';
     }
+    this.requestUpdate();
   }
   /**
    * Handler for value change.
@@ -297,8 +375,8 @@ class MultipartPayloadEditor extends mixinBehaviors([IronValidatableBehavior], A
    * @param {FormData} data Form data to be restored.
    * @return {Promise}
    */
-  _restoreFormData(data) {
-    if (!this.hasFormDataSupport) {
+  async _restoreFormData(data) {
+    if (!hasFormDataSupport) {
       return;
     }
     let textParts;
@@ -306,12 +384,10 @@ class MultipartPayloadEditor extends mixinBehaviors([IronValidatableBehavior], A
       textParts = data._arcMeta.textParts;
     }
     const it = data.entries();
-    return this._modelForParts(it, textParts)
-    .then((model) => {
-      this._cancelModelChange = true;
-      this.set('model', model);
-      this._cancelModelChange = false;
-    });
+    const model = await this._modelForParts(it, textParts);
+    this._cancelModelChange = true;
+    this.model = model;
+    this._cancelModelChange = false;
   }
   /**
    * @param {Iterator} entries
@@ -319,11 +395,11 @@ class MultipartPayloadEditor extends mixinBehaviors([IronValidatableBehavior], A
    * @param {Array} result
    * @return {Promise<Array>}
    */
-  _modelForParts(entries, textParts, result) {
+  async _modelForParts(entries, textParts, result) {
     result = result || [];
     const item = entries.next();
     if (item.done) {
-      return Promise.resolve(result);
+      return result;
     }
     const part = item.value;
     let modelItem = {
@@ -340,30 +416,28 @@ class MultipartPayloadEditor extends mixinBehaviors([IronValidatableBehavior], A
         modelItem.type = 'file';
       }
     }
-    let promise;
+    let value;
     if (restoreBlobValue) {
-      promise = this._blobToString(part[1]);
+      value = await this._blobToString(part[1]);
     } else {
-      promise = Promise.resolve({
+      value = {
         result: part[1]
-      });
+      };
     }
-    return promise.then((value) => {
-      modelItem.value = value.result;
-      modelItem = this._createModelObject(modelItem, {});
-      if (!modelItem.schema) {
-        modelItem.schema = {};
-      }
-      modelItem.schema.isFile = modelItem.type === 'file' ? true : false;
-      if (modelItem.schema.isFile) {
-        modelItem.value = part[1];
-      }
-      if (restoreBlobValue) {
-        modelItem.contentType = value.type;
-      }
-      result.push(modelItem);
-      return this._modelForParts(entries, textParts, result);
-    });
+    modelItem.value = value.result;
+    modelItem = this._createModelObject(modelItem, {});
+    if (!modelItem.schema) {
+      modelItem.schema = {};
+    }
+    modelItem.schema.isFile = modelItem.type === 'file' ? true : false;
+    if (modelItem.schema.isFile) {
+      modelItem.value = part[1];
+    }
+    if (restoreBlobValue) {
+      modelItem.contentType = value.type;
+    }
+    result.push(modelItem);
+    return this._modelForParts(entries, textParts, result);
   }
   /**
    * It dispatches `api-property-model-build` custom event that is handled by
@@ -416,7 +490,7 @@ class MultipartPayloadEditor extends mixinBehaviors([IronValidatableBehavior], A
    * @return {Boolean} True if model represents data in FormData object
    */
   _modelAndValueMatch(model, value) {
-    if (!this.hasFormDataSupport) {
+    if (!hasFormDataSupport) {
       return true;
     }
     if ((!model || !model.length) && value) {
@@ -425,27 +499,25 @@ class MultipartPayloadEditor extends mixinBehaviors([IronValidatableBehavior], A
     if (!value) {
       return true;
     }
-    const it = value.keys();
     const modelSize = model.length;
-    while (true) {
-      const item = it.next();
-      if (item.done) {
-        return true;
-      }
-      let fasItem = false;
+    const it = value.keys();
+    const item = it.next();
+    while (!item.done) {
+      let hasItem = false;
       for (let i = 0; i < modelSize; i++) {
         if (model[i].name === item.value) {
-          fasItem = true;
+          hasItem = true;
           break;
         }
       }
-      if (!fasItem) {
+      if (!hasItem) {
         return false;
       }
     }
+    return true;
   }
   // Generates a message and displays highlighted content of the message.
-  _previewOpenedChanged(opened) {
+  async _previewOpenedChanged(opened) {
     if (!opened) {
       return;
     }
@@ -456,46 +528,34 @@ class MultipartPayloadEditor extends mixinBehaviors([IronValidatableBehavior], A
       this.previewOpened = false;
       return;
     }
-    this._generatePreview()
-    .then((preview) => {
-      if (!preview) {
-        this.previewOpened = false;
-        return;
+    const preview = await this._generatePreview();
+    if (!preview) {
+      this.previewOpened = false;
+      return;
+    }
+    const e = new CustomEvent('syntax-highlight', {
+      bubbles: true,
+      composed: true,
+      detail: {
+        code: preview,
+        lang: 'http'
       }
-      const e = new CustomEvent('syntax-highlight', {
-        bubbles: true,
-        composed: true,
-        detail: {
-          code: preview,
-          lang: 'http'
-        }
-      });
-      this.dispatchEvent(e);
-      this.shadowRoot.querySelector('code').innerHTML = e.detail.code || preview;
     });
-  }
-
-  _computeToggleIcon(previewOpened) {
-    return previewOpened ? 'arc:visibility-off' : 'arc:visibility';
+    this.dispatchEvent(e);
+    this.messagePreview = e.detail.code || preview;
   }
 
   /**
    * Called when the model chage. Regenerates the FormData object.
    *
-   * @param {Object} record Polymer change record
+   * @param {Array} model
    */
-  _modelChanged(record) {
+  _modelChanged(model) {
     if (this._cancelModelChange) {
       return;
     }
-    if (!record || !record.path) {
-      return;
-    }
-    if (record.path === 'model.splices') {
-      return;
-    }
-    const formData = this.createFormData(record.base);
-    this.set('value', formData);
+    const formData = this.createFormData(model);
+    this.value = formData;
   }
   /**
    * Generates FormData from the model.
@@ -505,9 +565,10 @@ class MultipartPayloadEditor extends mixinBehaviors([IronValidatableBehavior], A
    * mime types).
    *
    * @param {Array} model View data model.
+   * @return {FormData}
    */
   createFormData(model) {
-    if (this.hasFormDataSupport) {
+    if (hasFormDataSupport) {
       return this._getFormData(model);
     } else {
       return this._getLegacyFormData(model);
@@ -537,7 +598,7 @@ class MultipartPayloadEditor extends mixinBehaviors([IronValidatableBehavior], A
         hasValue = true;
       } else {
         if (item.contentType) {
-          var blob = new Blob([item.value], {type: item.contentType});
+          const blob = new Blob([item.value], { type: item.contentType });
           fd.append(item.name, blob);
           if (!fd._arcMeta) {
             fd._arcMeta = {};
@@ -575,47 +636,71 @@ class MultipartPayloadEditor extends mixinBehaviors([IronValidatableBehavior], A
     return hasValue ? new FormData(this._getForm()) : undefined;
   }
   /**
-   * Generates a preview message from the FormData object.
-   *
-   * @return {Promise} A promise fulfilled with the content. Content can be undefined
-   * if message couldn't be generated because of lack of support.
+   * Coppies current response text value to clipboard.
+   * @param {Event} e
    */
-  _generatePreview() {
-    this.set('messagePreview', undefined);
-    this.set('generatingPreview', true);
-    const transformer = this.shadowRoot.querySelector('multipart-payload-transformer');
-    transformer.formData = this.value;
-    return transformer.generatePreview()
-    .then((preview) => {
-      this.set('generatingPreview', false);
-      this.set('messagePreview', preview);
-      return preview;
-    })
-    .catch((cause) => {
-      this.set('generatingPreview', false);
-      const toast = this.shadowRoot.querySelector('paper-toast');
-      toast.text = cause.message;
-      toast.opened = true;
-    });
-  }
-  // Handler for copy to clipboard click.
-  _copyToClipboard() {
-    const elm = this.shadowRoot.querySelector('clipboard-copy');
-    if (elm.copy()) {
-      this.shadowRoot.querySelector('#copyIcon').icon = 'arc:done';
+  _copyToClipboard(e) {
+    const button = e.target;
+    const copy = this.shadowRoot.querySelector('clipboard-copy');
+    if (copy.copy()) {
+      button.innerText = 'Done';
     } else {
-      this.shadowRoot.querySelector('#copyIcon').icon = 'arc:error';
-      const toast = this.shadowRoot.querySelector('paper-toast');
-      toast.text = 'Copy command is disabled in your browser.';
-      toast.opened = true;
+      button.innerText = 'Error';
     }
-    if (this.__copyButtonAsync) {
-      clearTimeout(this.__copyButtonAsync);
+    button.disabled = true;
+    if ('part' in button) {
+      button.part.add('content-action-button-disabled');
+      button.part.add('code-content-action-button-disabled');
     }
-    this.__copyButtonAsync = setTimeout(() => {
-      this.shadowRoot.querySelector('#copyIcon').icon = 'arc:content-copy';
-      this.__copyButtonAsync = undefined;
-    }, 1000);
+    setTimeout(() => this._resetCopyButtonState(button), 1000);
+    const ev = new CustomEvent('send-analytics', {
+      detail: {
+        type: 'event',
+        category: 'Usage',
+        action: 'Click',
+        label: 'Multipart payload editor clipboard copy',
+      },
+      bubbles: true,
+      composed: true
+    });
+    this.dispatchEvent(ev);
+  }
+
+  _resetCopyButtonState(button) {
+    button.innerText = 'Copy';
+    button.disabled = false;
+    if ('part' in button) {
+      button.part.remove('content-action-button-disabled');
+      button.part.remove('code-content-action-button-disabled');
+    }
+  }
+
+  _previewHandler(e) {
+    this.previewOpened = e.detail.value;
+  }
+
+  _nameChangeHandler(e) {
+    this._propertyHandler('name', e);
+  }
+
+  _valueChangeHandler(e) {
+    this._propertyHandler('value', e);
+  }
+
+  _typeChangeHandler(e) {
+    this._propertyHandler('type', e);
+  }
+
+  _propertyHandler(prop, e) {
+    const index = Number(e.target.dataset.index);
+    /* istanbul ignore if  */
+    if (index !== index) {
+      return;
+    }
+    const { value } = e.detail;
+    this.model[index][prop] = value;
+    // this.model = [...this.model];
+    // this._modelChanged(this.model);
   }
 }
-window.customElements.define(MultipartPayloadEditor.is, MultipartPayloadEditor);
+window.customElements.define('multipart-payload-editor', MultipartPayloadEditor);

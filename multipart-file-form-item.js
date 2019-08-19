@@ -11,136 +11,192 @@ WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 License for the specific language governing permissions and limitations under
 the License.
 */
-import {PolymerElement} from '../../@polymer/polymer/polymer-element.js';
-import {IronValidatableBehavior} from '../../@polymer/iron-validatable-behavior/iron-validatable-behavior.js';
-import {html} from '../../@polymer/polymer/lib/utils/html-tag.js';
-import {mixinBehaviors} from '../../@polymer/polymer/lib/legacy/class.js';
-import '../../@polymer/paper-input/paper-input.js';
-import '../../@polymer/paper-button/paper-button.js';
-import '../../@polymer/paper-icon-button/paper-icon-button.js';
-import '../../@polymer/iron-flex-layout/iron-flex-layout.js';
-import '../../@advanced-rest-client/arc-icons/arc-icons.js';
-import '../../@polymer/iron-collapse/iron-collapse.js';
-import '../../@polymer/marked-element/marked-element.js';
-import '../../@advanced-rest-client/markdown-styles/markdown-styles.js';
+import { html, css, LitElement } from 'lit-element';
+import { ValidatableMixin } from '@anypoint-web-components/validatable-mixin/validatable-mixin.js';
+import markdownStyles from '@advanced-rest-client/markdown-styles/markdown-styles.js';
+import formStyles from '@api-components/api-form-mixin/api-form-styles.js';
+import '@anypoint-web-components/anypoint-input/anypoint-input.js';
+import '@anypoint-web-components/anypoint-button/anypoint-button.js';
+import '@anypoint-web-components/anypoint-button/anypoint-icon-button.js';
+import '@advanced-rest-client/arc-icons/arc-icons.js';
+import '@advanced-rest-client/arc-marked/arc-marked.js';
 /**
  * A file form item.
  *
  * @customElement
- * @polymer
  * @demo demo/index.html
- * @appliesMixin Polymer.IronValidatableBehavior
+ * @appliesMixin ValidatableMixin
  */
-class MultipartFileFormItem extends mixinBehaviors([IronValidatableBehavior], PolymerElement) {
-  static get template() {
+class MultipartFileFormItem extends ValidatableMixin(LitElement) {
+  static get styles() {
+    return [
+      markdownStyles,
+      formStyles,
+      css`:host {
+        display: block;
+        flex: 1;
+      }
+
+      *[hidden] {
+        display: none !important;
+      }
+
+      .file-row {
+        margin: 8px 0;
+      }
+
+      .controls {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        flex: 1;
+      }
+
+      .controls > *:not(:last-child) {
+        margin-right: 12px;
+      }
+
+      .file-trigger,
+      .param-name {
+        margin-right: 12px;
+      }
+
+      .files-counter-message {
+        color: var(--multipart-file-form-item-counter-color, rgba(0, 0, 0, 0.74));
+        flex: 1;
+        font-size: var(--arc-font-body1-font-size);
+        font-weight: var(--arc-font-body1-font-weight);
+        line-height: var(--arc-font-body1-line-height);
+      }
+
+      .name-field {
+        max-width: 360px;
+        flex: 1;
+      }`
+    ];
+  }
+
+  render() {
+    const {
+      name,
+      value,
+      model,
+      docsOpened,
+      readOnly,
+      disabled,
+      legacy,
+      outlined,
+      _hasFile
+    } = this;
+
     return html`
-    <style include="markdown-styles"></style>
-    <style include="api-form-styles">
-    :host {
-      display: block;
-      @apply --layout-flex;
-    }
-
-    *[hidden] {
-      display: none !important;
-    }
-
-    .file-row {
-      margin: 8px 0;
-    }
-
-    .controls {
-      @apply --layout-horizontal;
-      @apply --layout-flex;
-      @apply --layout-center;
-    }
-
-    .controls > *:not(:last-child) {
-      margin-right: 12px;
-    }
-
-    .file-trigger,
-    .param-name {
-      margin-right: 12px;
-    }
-
-    .file-trigger {
-      color: var(--multipart-payload-editor-file-trigger-color, var(--accent-color, #FF5722));
-    }
-
-    .files-counter-message {
-      color: rgba(0, 0, 0, 0.74);
-      @apply --layout-flex;
-      @apply --arc-font-body1;
-    }
-
-    .name-field {
-      max-width: 360px;
-      @apply --layout-flex;
-    }
-    </style>
     <div class="file-row">
       <div class="controls">
-        <paper-input error-message="The name is required" label="Field name"
-          required="" auto-validate="" value="{{name}}" class="name-field"></paper-input>
-        <paper-button raised="" on-click="_selectFile" class="file-trigger">Choose file</paper-button>
-        <template is="dom-if" if="[[hasFile]]">
-          <span class="files-counter-message" hidden\$="[[!hasFile]]">[[value.name]] ([[value.size]] bytes)</span>
-        </template>
-        <template is="dom-if" if="[[model.hasDescription]]">
-          <paper-icon-button class="hint-icon" icon="arc:help"
-            on-click="toggleDocumentation" title="Display documentation"></paper-icon-button>
-        </template>
+        <anypoint-input
+          class="name-field"
+          invalidmessage="The name is required"
+          required
+          autovalidate
+          .value="${name}"
+          @value-changed="${this._nameHandler}"
+          nolabelfloat
+          ?outlined="${outlined}"
+          ?legacy="${legacy}"
+          .readOnly="${readOnly}"
+          .disabled=${disabled}
+          >
+            <label slot="label">Field name</label>
+        </anypoint-input>
+
+        <anypoint-button emphasis="high" @click="${this._selectFile}" class="file-trigger">Choose file</anypoint-button>
+
+        ${_hasFile ?
+          html`<span
+          class="files-counter-message">
+            ${value.name} (${value.size} bytes)
+          </span>` : undefined}
+
+        ${model.hasDescription ? html`<anypoint-icon-button
+          class="hint-icon"
+          title="Toggle documentation"
+          ?outlined="${outlined}"
+          ?legacy="${legacy}"
+          ?disabled="${disabled}"
+          @click="${this.toggleDocumentation}">
+          <iron-icon icon="arc:help"></iron-icon>
+        </anypoint-icon-button>` : undefined}
       </div>
-      <template is="dom-if" if="[[model.hasDescription]]" restamp="">
-        <div class="docs">
-          <iron-collapse opened="[[docsOpened]]">
-            <marked-element markdown="[[model.description]]">
-              <div slot="markdown-html" class="markdown-body"></div>
-            </marked-element>
-          </iron-collapse>
-        </div>
-      </template>
+
+      ${docsOpened && model.hasDescription ? html`<div class="docs">
+        <arc-marked .markdown="${model.description}">
+          <div slot="markdown-html" class="markdown-body"></div>
+        </arc-marked>
+      </div>` : undefined}
     </div>
-    <input type="file" hidden="" on-change="_fileObjectChanged" accept\$="[[_computeAccept(model)]]">
+
+    <input type="file" hidden @change="${this._fileObjectChanged}" accept="${this._computeAccept(model)}">
 `;
   }
 
-  static get is() {
-    return 'multipart-file-form-item';
-  }
+
   static get properties() {
     return {
       /**
        * Computed value, true if the control has a file.
        */
-      hasFile: {
-        type: Boolean,
-        computed: '_computeHasFile(value)'
-      },
+      _hasFile: { type: Boolean },
       /**
        * Name of this control
        */
-      name: {
-        type: String,
-        notify: true
-      },
+      name: { type: String },
       /**
        * Valuie of this control.
        */
-      value: {
-        type: String,
-        notify: true
-      },
+      value: { type: String },
       /**
        * A view model.
        */
-      model: Object,
+      model: { type: Object },
       /**
        * True to render documentation (if set in model)
        */
-      docsOpened: Boolean
+      docsOpened: { type: Boolean },
+      /**
+       * Enables Anypoint legacy styling
+       */
+      legacy: { type: Boolean },
+      /**
+       * Enables Material Design outlined style
+       */
+      outlined: { type: Boolean },
+      /**
+       * When set the editor is in read only mode.
+       */
+      readOnly: { type: Boolean },
+      /**
+       * When set all controls are disabled in the form
+       */
+      disabled: { type: Boolean }
     };
+  }
+
+  get value() {
+    return this._value;
+  }
+
+  set value(value) {
+    const old = this._value;
+    /* istanbul ignore if */
+    if (old === value) {
+      return;
+    }
+    this._value = value;
+    this._hasFile = this._computeHasFile(value);
+    this.dispatchEvent(new CustomEvent('value-chanegd', {
+      detail: {
+        value
+      }
+    }));
   }
   /**
    * Toggles documentation (if available)
@@ -179,7 +235,8 @@ class MultipartFileFormItem extends mixinBehaviors([IronValidatableBehavior], Po
    * @param {Event} e
    */
   _fileObjectChanged(e) {
-    this.set('value', e.target.files[0]);
+    const [file] = e.target.files;
+    this.value = file;
   }
   /**
    * Computes the `accept`attribute for file input.
@@ -200,5 +257,15 @@ class MultipartFileFormItem extends mixinBehaviors([IronValidatableBehavior], Po
       }
     }
   }
+
+  _nameHandler(e) {
+    const { value } = e.detail;
+    this.name = value;
+    this.dispatchEvent(new CustomEvent('name-changed', {
+      detail: {
+        value
+      }
+    }));
+  }
 }
-window.customElements.define(MultipartFileFormItem.is, MultipartFileFormItem);
+window.customElements.define('multipart-file-form-item', MultipartFileFormItem);
