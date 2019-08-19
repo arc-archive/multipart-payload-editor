@@ -86,7 +86,18 @@ class ApiDemo extends ApiDemoPageBase {
   }
 
   _mainValueChanged(e) {
-    this.payloadResult = e.detail.value;
+    const { value } = e.detail;
+    const log = [];
+    value.forEach((value, name) => {
+      let item = `${name}: `;
+      if (value.name) {
+        item += value.name;
+      } else {
+        item += value;
+      }
+      log[log.length] = item;
+    });
+    this.payloadResult = log.join('\n');
   }
 
   _modelHandler(e) {

@@ -79,20 +79,20 @@ class MultipartTextFormItem extends ValidatableMixin(LitElement) {
       type,
       name,
       value,
-      model,
       docsOpened,
       readOnly,
       disabled,
       legacy,
       outlined,
     } = this;
+    const model = this.model || { schema: {} };
     return html`
     <div class="multipart-item">
       ${hasFormData ? html`<div class="mime-selector">
         <anypoint-input
+          class="type-field"
           .value="${type}"
           @value-changed="${this._typeHandler}"
-          nolabelfloat
           type="text"
           ?outlined="${outlined}"
           ?legacy="${legacy}"
@@ -111,7 +111,6 @@ class MultipartTextFormItem extends ValidatableMixin(LitElement) {
           autovalidate
           .value="${name}"
           @value-changed="${this._nameHandler}"
-          nolabelfloat
           ?outlined="${outlined}"
           ?legacy="${legacy}"
           .readOnly="${readOnly}"
@@ -120,11 +119,11 @@ class MultipartTextFormItem extends ValidatableMixin(LitElement) {
             <label slot="label">Field name</label>
         </anypoint-input>
         <api-property-form-item
+          class="value-field"
           .model="${model}"
           name="${name}"
           .value="${value}"
           @value-changed="${this._valueHandler}"
-          nolabelfloat
           ?outlined="${outlined}"
           ?legacy="${legacy}"
           .readOnly="${readOnly}"

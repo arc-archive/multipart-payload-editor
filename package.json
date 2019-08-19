@@ -40,7 +40,6 @@
     "@api-components/api-property-form-item": "^3.0.5",
     "@api-components/api-view-model-transformer": "^3.0.1",
     "@polymer/iron-form": "^3.0.0",
-    "@polymer/paper-spinner": "^3.0.2",
     "@polymer/paper-toast": "^3.0.0",
     "@polymer/prism-element": "^3.0.0",
     "lit-element": "^2.0.1",

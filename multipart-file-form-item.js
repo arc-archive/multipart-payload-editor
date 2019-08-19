@@ -80,7 +80,6 @@ class MultipartFileFormItem extends ValidatableMixin(LitElement) {
     const {
       name,
       value,
-      model,
       docsOpened,
       readOnly,
       disabled,
@@ -88,7 +87,7 @@ class MultipartFileFormItem extends ValidatableMixin(LitElement) {
       outlined,
       _hasFile
     } = this;
-
+    const model = this.model || { };
     return html`
     <div class="file-row">
       <div class="controls">
@@ -99,7 +98,6 @@ class MultipartFileFormItem extends ValidatableMixin(LitElement) {
           autovalidate
           .value="${name}"
           @value-changed="${this._nameHandler}"
-          nolabelfloat
           ?outlined="${outlined}"
           ?legacy="${legacy}"
           .readOnly="${readOnly}"
@@ -134,8 +132,7 @@ class MultipartFileFormItem extends ValidatableMixin(LitElement) {
       </div>` : undefined}
     </div>
 
-    <input type="file" hidden @change="${this._fileObjectChanged}" accept="${this._computeAccept(model)}">
-`;
+    <input type="file" hidden @change="${this._fileObjectChanged}" accept="${this._computeAccept(model)}">`;
   }
 
 
@@ -192,7 +189,7 @@ class MultipartFileFormItem extends ValidatableMixin(LitElement) {
     }
     this._value = value;
     this._hasFile = this._computeHasFile(value);
-    this.dispatchEvent(new CustomEvent('value-chanegd', {
+    this.dispatchEvent(new CustomEvent('value-changed', {
       detail: {
         value
       }
@@ -248,13 +245,14 @@ class MultipartFileFormItem extends ValidatableMixin(LitElement) {
     if (!model) {
       return;
     }
+    let types;
     if (model.fileTypes && model.fileTypes.length && typeof model.fileTypes[0] === 'string') {
-      return model.fileTypes.join(',');
+      types = model.fileTypes;
+    } else if (model.fixedFacets && model.fixedFacets.fileTypes && model.fixedFacets.fileTypes.length) {
+      types = model.fixedFacets.fileTypes;
     }
-    if (model.fixedFacets) {
-      if (model.fixedFacets.fileTypes && model.fixedFacets.fileTypes.length) {
-        return model.fixedFacets.fileTypes.join(',');
-      }
+    if (types) {
+      return types.join(',');
     }
   }
 

@@ -13,7 +13,9 @@ the License.
 */
 import { html, css, LitElement } from 'lit-element';
 import { ValidatableMixin } from '@anypoint-web-components/validatable-mixin/validatable-mixin.js';
-import {ApiFormMixin} from '@api-components/api-form-mixin/api-form-mixin.js';
+import { unsafeHTML } from 'lit-html/directives/unsafe-html.js';
+import { cache } from 'lit-html/directives/cache.js';
+import { ApiFormMixin } from '@api-components/api-form-mixin/api-form-mixin.js';
 import formStyles from '@api-components/api-form-mixin/api-form-styles.js';
 import prismStyles from '@advanced-rest-client/prism-highlight/prism-styles.js';
 import '@advanced-rest-client/arc-icons/arc-icons.js';
@@ -37,6 +39,7 @@ try {
   fd.append('test', new Blob(['.'], {type: 'image/jpg'}), 'test.jpg');
   hasFormDataSupport = ('entries' in fd);
 } catch (e) {
+  /* istanbul ignore next  */
   hasFormDataSupport = false;
 }
 /**
@@ -86,21 +89,15 @@ class MultipartPayloadEditor extends ApiFormMixin(ValidatableMixin(LitElement)) 
       .form-item {
         display: flex;
         flex-direction: row;
-        margin: 8px 0;
       }
 
       .delete-action {
         display: block;
-        margin-top: 20px;
-      }
-
-      .form-item:not([data-file]) .delete-action {
-        margin-top: 42px;
       }
 
       multipart-text-form-item,
       multipart-file-form-item {
-        margin-bottom: 8px;
+        margin: 8px 0;
       }
 
       code {
@@ -108,6 +105,9 @@ class MultipartPayloadEditor extends ApiFormMixin(ValidatableMixin(LitElement)) 
         white-space: pre-line;
         word-break: break-all;
         overflow: auto;
+        margin: 20px;
+        box-sizing: border-box;
+        display: block;
       }
 
       .editor-actions {
@@ -118,8 +118,8 @@ class MultipartPayloadEditor extends ApiFormMixin(ValidatableMixin(LitElement)) 
     ];
   }
 
-  _previewTemplate(messagePreview) {
-    return html`<code>${messagePreview}</code>`;
+  _previewTemplate() {
+    return html`<code>${unsafeHTML(this._messagePreviewCode || '')}</code>`;
   }
 
   _formItemTemplate(item, index) {
@@ -158,20 +158,18 @@ class MultipartPayloadEditor extends ApiFormMixin(ValidatableMixin(LitElement)) 
         .readOnly="${readOnly}"
         .disabled=${disabled}></multipart-text-form-item>`}
 
-      <span class="delete-action">
-        <anypoint-icon-button
-          title="Remove this parameter"
-          aria-label="Press to remove parameter ${item.name}"
-          class="action-icon delete-icon"
-          data-index="${index}"
-          @click="${this._removeCustom}"
-          slot="suffix"
-          ?disabled="${readOnly || disabled}"
-          ?outlined="${outlined}"
-          ?legacy="${legacy}">
-          <iron-icon icon="arc:remove-circle-outline"></iron-icon>
-        </anypoint-icon-button>
-      </span>
+      <anypoint-icon-button
+        title="Remove this parameter"
+        aria-label="Press to remove parameter ${item.name}"
+        class="action-icon delete-icon"
+        data-index="${index}"
+        @click="${this._removeCustom}"
+        slot="suffix"
+        ?disabled="${readOnly || disabled}"
+        ?outlined="${outlined}"
+        ?legacy="${legacy}">
+        <iron-icon icon="arc:remove-circle-outline"></iron-icon>
+      </anypoint-icon-button>
     </div>`;
   }
 
@@ -212,28 +210,27 @@ class MultipartPayloadEditor extends ApiFormMixin(ValidatableMixin(LitElement)) 
       <anypoint-button
         part="content-action-button, code-content-action-button"
         class="action-button"
-        data-action="copy"
-        emphasis="medium"
+        data-action="preview"
+        emphasis="low"
         toggles
         .active="${previewOpened}"
         @active-changed="${this._previewHandler}"
         aria-label="Press to toggle payload preview"
         title="Toggles generated payload message preview"
         ?disabled="${generatingPreview}">Preview</anypoint-button>
-      <anypoint-button
+      ${messagePreview && previewOpened ? html`<anypoint-button
         part="content-action-button, code-content-action-button"
         class="action-button"
         data-action="copy"
-        emphasis="medium"
+        emphasis="low"
         @click="${this._copyToClipboard}"
         aria-label="Press to copy payload to clipboard"
         title="Copy payload to clipboard"
-        ?disabled="${generatingPreview}">Copy</anypoint-button>
-      <paper-spinner alt="Loading preview" .active="${generatingPreview}"></paper-spinner>
+        ?disabled="${generatingPreview}">Copy</anypoint-button>` : ''}
     </div>` : undefined}
-
+    ${generatingPreview ? html`<p>Generating the preview</p>` : ''}
     <section>
-    ${previewOpened ? this._previewTemplate(messagePreview) : this._formTemplate()}
+    ${cache(previewOpened ? this._previewTemplate() : this._formTemplate())}
     </section>
 
     <prism-highlighter></prism-highlighter>
@@ -258,6 +255,7 @@ class MultipartPayloadEditor extends ApiFormMixin(ValidatableMixin(LitElement)) 
       generatingPreview: { type: Boolean },
       // Generated body message preview
       messagePreview: { type: String },
+      _messagePreviewCode: { type: String },
       /**
        * Enables Anypoint legacy styling
        */
@@ -282,6 +280,7 @@ class MultipartPayloadEditor extends ApiFormMixin(ValidatableMixin(LitElement)) 
   }
 
   set model(value) {
+    /* istanbul ignore else */
     if (this._sop('model', value)) {
       this._notifyChanged('model', value);
       this.renderEmptyMessage = this._computeRenderEmptyMessage(this.allowCustom, value);
@@ -310,6 +309,51 @@ class MultipartPayloadEditor extends ApiFormMixin(ValidatableMixin(LitElement)) 
       this._previewOpenedChanged(value);
     }
   }
+  /**
+   * @return {Function} Previously registered handler for `model-changed` event
+   */
+  get onmodel() {
+    return this['_onmodel-changed'];
+  }
+  /**
+   * Registers a callback function for `model-changed` event
+   * @param {Function} value A callback to register. Pass `null` or `undefined`
+   * to clear the listener.
+   */
+  set onmodel(value) {
+    this._registerCallback('model-changed', value);
+  }
+  /**
+   * @return {Function} Previously registered handler for `value-changed` event
+   */
+  get onchange() {
+    return this['_onvalue-changed'];
+  }
+  /**
+   * Registers a callback function for `value-changed` event
+   * @param {Function} value A callback to register. Pass `null` or `undefined`
+   * to clear the listener.
+   */
+  set onchange(value) {
+    this._registerCallback('value-changed', value);
+  }
+  /**
+   * Registers an event handler for given type
+   * @param {String} eventType Event type (name)
+   * @param {Function} value The handler to register
+   */
+  _registerCallback(eventType, value) {
+    const key = `_on${eventType}`;
+    if (this[key]) {
+      this.removeEventListener(eventType, this[key]);
+    }
+    if (typeof value !== 'function') {
+      this[key] = null;
+      return;
+    }
+    this[key] = value;
+    this.addEventListener(eventType, value);
+  }
 
   firstUpdated() {
     if (!this.model) {
@@ -327,7 +371,7 @@ class MultipartPayloadEditor extends ApiFormMixin(ValidatableMixin(LitElement)) 
     const index = this.model.length - 1;
     const item = this.model[index];
     item.schema.isFile = true;
-    item.schema.type = 'file';
+    item.schema.inputType = 'file';
     this.requestUpdate();
   }
   /**
@@ -341,7 +385,8 @@ class MultipartPayloadEditor extends ApiFormMixin(ValidatableMixin(LitElement)) 
     const index = this.model.length - 1;
     const item = this.model[index];
     item.schema.isFile = false;
-    item.schema.type = 'string';
+    item.schema.inputType = 'text';
+    /* istanbul ignore else */
     if (hasFormDataSupport) {
       item.contentType = '';
     }
@@ -354,7 +399,7 @@ class MultipartPayloadEditor extends ApiFormMixin(ValidatableMixin(LitElement)) 
    * @param {FormData} value
    */
   _valueChanged(value) {
-    if (!(value instanceof FormData)) {
+    if (this.__internalChange || !(value instanceof FormData)) {
       return;
     }
     const currentModel = this.model;
@@ -376,6 +421,7 @@ class MultipartPayloadEditor extends ApiFormMixin(ValidatableMixin(LitElement)) 
    * @return {Promise}
    */
   async _restoreFormData(data) {
+    /* istanbul ignore if */
     if (!hasFormDataSupport) {
       return;
     }
@@ -490,6 +536,7 @@ class MultipartPayloadEditor extends ApiFormMixin(ValidatableMixin(LitElement)) 
    * @return {Boolean} True if model represents data in FormData object
    */
   _modelAndValueMatch(model, value) {
+    /* istanbul ignore if */
     if (!hasFormDataSupport) {
       return true;
     }
@@ -522,12 +569,12 @@ class MultipartPayloadEditor extends ApiFormMixin(ValidatableMixin(LitElement)) 
       return;
     }
     if (!this.value) {
-      const toast = this.shadowRoot.querySelector('paper-toast');
-      toast.text = 'Add a valid form items first';
-      toast.opened = true;
+      this._toastMessage('Add a valid form items before generating a preview');
       this.previewOpened = false;
       return;
     }
+    this.messagePreview = undefined;
+    this._messagePreviewCode = undefined;
     const preview = await this._generatePreview();
     if (!preview) {
       this.previewOpened = false;
@@ -542,9 +589,18 @@ class MultipartPayloadEditor extends ApiFormMixin(ValidatableMixin(LitElement)) 
       }
     });
     this.dispatchEvent(e);
-    this.messagePreview = e.detail.code || preview;
+    this._messagePreviewCode = e.detail.code || preview;
+    this.messagePreview = preview;
   }
-
+  /**
+   * Renders a message in the paper-toast
+   * @param {String} text A message to render
+   */
+  _toastMessage(text) {
+    const toast = this.shadowRoot.querySelector('paper-toast');
+    toast.text = text;
+    toast.opened = true;
+  }
   /**
    * Called when the model chage. Regenerates the FormData object.
    *
@@ -554,8 +610,10 @@ class MultipartPayloadEditor extends ApiFormMixin(ValidatableMixin(LitElement)) 
     if (this._cancelModelChange) {
       return;
     }
+    this.__internalChange = true;
     const formData = this.createFormData(model);
     this.value = formData;
+    this.__internalChange = false;
   }
   /**
    * Generates FormData from the model.
@@ -576,6 +634,10 @@ class MultipartPayloadEditor extends ApiFormMixin(ValidatableMixin(LitElement)) 
   }
   /**
    * Generates the FormData object from the model instead of the form.
+   *
+   * Text form parts with a mime type are added to the form as instance of Blob.
+   * Name of such item is added to generated from data's `_arcMeta.textParts`
+   * list so the processors can identify them.
    *
    * @param {Array} model The model to generate form data from.
    * @return {FormData|undefined} Form data from model or undefined if model is empty.
@@ -633,7 +695,26 @@ class MultipartPayloadEditor extends ApiFormMixin(ValidatableMixin(LitElement)) 
         hasValue = true;
       }
     }
-    return hasValue ? new FormData(this._getForm()) : undefined;
+    return hasValue ? new FormData(this._getForm().children[0]) : undefined;
+  }
+  /**
+   * Generates a preview message from the FormData object.
+   *
+   * @return {Promise} A promise fulfilled with the content. Content can be undefined
+   * if message couldn't be generated because of lack of support.
+   */
+  async _generatePreview() {
+    this.generatingPreview = true;
+    const transformer = this.shadowRoot.querySelector('multipart-payload-transformer');
+    transformer.formData = this.value;
+    try {
+      const message = await transformer.generatePreview();
+      this.generatingPreview = false;
+      return message;
+    } catch (cause) {
+      this.generatingPreview = false;
+      this._toastMessage(cause.message);
+    }
   }
   /**
    * Coppies current response text value to clipboard.
@@ -688,7 +769,7 @@ class MultipartPayloadEditor extends ApiFormMixin(ValidatableMixin(LitElement)) 
   }
 
   _typeChangeHandler(e) {
-    this._propertyHandler('type', e);
+    this._propertyHandler('contentType', e);
   }
 
   _propertyHandler(prop, e) {
@@ -699,8 +780,7 @@ class MultipartPayloadEditor extends ApiFormMixin(ValidatableMixin(LitElement)) 
     }
     const { value } = e.detail;
     this.model[index][prop] = value;
-    // this.model = [...this.model];
-    // this._modelChanged(this.model);
+    this.model = [...this.model];
   }
 }
 window.customElements.define('multipart-payload-editor', MultipartPayloadEditor);
