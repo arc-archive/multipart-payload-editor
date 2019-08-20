@@ -24,12 +24,10 @@ import '@anypoint-web-components/anypoint-button/anypoint-icon-button.js';
 import '@polymer/paper-toast/paper-toast.js';
 import '@advanced-rest-client/multipart-payload-transformer/multipart-payload-transformer.js';
 import '@advanced-rest-client/clipboard-copy/clipboard-copy.js';
-
 import '@polymer/prism-element/prism-import.js';
 import '@polymer/prism-element/prism-highlighter.js';
 import '@polymer/prism-element/prism-theme-default.js';
 import 'prismjs/components/prism-http.js';
-
 import './multipart-text-form-item.js';
 import './multipart-file-form-item.js';
 export let hasFormDataSupport;
@@ -173,60 +171,65 @@ class MultipartPayloadEditor extends ApiFormMixin(ValidatableMixin(LitElement)) 
   }
 
   _formTemplate() {
-    const {
-      readOnly,
-      disabled,
-    } = this;
     const model = this.model || [];
     return html`
       <iron-form>
         <form enctype="multipart/form-data" method="post">
           ${model.map((item, index) => this._formItemTemplate(item, index))}
         </form>
-      </iron-form>
-      <div class="add-actions">
-        <anypoint-button
-          class="action-button"
-          @click="${this.addFile}"
-          ?disabled="${disabled || readOnly}"
-          emphasis="medium">Add file part</anypoint-button>
-        <anypoint-button
-          class="action-button"
-          @click="${this.addText}"
-          ?disabled="${disabled || readOnly}"
-          emphasis="medium">Add text part</anypoint-button>
-      </div>`;
+      </iron-form>`;
   }
 
   render() {
     const {
       previewOpened,
       generatingPreview,
-      messagePreview
+      messagePreview,
+      readOnly,
+      disabled,
     } = this;
+
     return html`
-    ${hasFormDataSupport ? html`<div class="editor-actions">
+    <div class="editor-actions">
       <anypoint-button
         part="content-action-button, code-content-action-button"
         class="action-button"
-        data-action="preview"
-        emphasis="low"
-        toggles
-        .active="${previewOpened}"
-        @active-changed="${this._previewHandler}"
-        aria-label="Press to toggle payload preview"
-        title="Toggles generated payload message preview"
-        ?disabled="${generatingPreview}">Preview</anypoint-button>
-      ${messagePreview && previewOpened ? html`<anypoint-button
+        data-action="add-file"
+        @click="${this.addFile}"
+        ?disabled="${disabled || readOnly || previewOpened}"
+        emphasis="medium">Add file part</anypoint-button>
+      <anypoint-button
         part="content-action-button, code-content-action-button"
         class="action-button"
-        data-action="copy"
-        emphasis="low"
-        @click="${this._copyToClipboard}"
-        aria-label="Press to copy payload to clipboard"
-        title="Copy payload to clipboard"
-        ?disabled="${generatingPreview}">Copy</anypoint-button>` : ''}
-    </div>` : undefined}
+        data-action="add-text"
+        @click="${this.addText}"
+        ?disabled="${disabled || readOnly || previewOpened}"
+        emphasis="medium">Add text part</anypoint-button>
+      ${hasFormDataSupport ? html`
+        <anypoint-button
+          part="content-action-button, code-content-action-button"
+          class="action-button"
+          data-action="preview"
+          emphasis="low"
+          toggles
+          .active="${previewOpened}"
+          @active-changed="${this._previewHandler}"
+          aria-label="Press to toggle payload preview"
+          title="Toggles generated payload message preview"
+          ?disabled="${generatingPreview}">Preview</anypoint-button>
+        ${messagePreview && previewOpened ? html`<anypoint-button
+          part="content-action-button, code-content-action-button"
+          class="action-button"
+          data-action="copy"
+          emphasis="low"
+          @click="${this._copyToClipboard}"
+          aria-label="Press to copy payload to clipboard"
+          title="Copy payload to clipboard"
+          ?disabled="${generatingPreview}">Copy</anypoint-button>` :
+          ''}
+      ` : undefined}
+      <slot name="content-action"></slot>
+    </div>
     ${generatingPreview ? html`<p>Generating the preview</p>` : ''}
     <section>
     ${cache(previewOpened ? this._previewTemplate() : this._formTemplate())}

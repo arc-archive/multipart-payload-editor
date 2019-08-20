@@ -132,7 +132,7 @@ describe('<multipart-payload-editor>', function() {
 
     it('renders add buttons', async () => {
       const element = await basicFixture();
-      const nodes = element.shadowRoot.querySelectorAll('.add-actions .action-button');
+      const nodes = element.shadowRoot.querySelectorAll('[data-action="add-file"],[data-action="add-text"]');
       assert.lengthOf(nodes, 2);
     });
   });
@@ -198,7 +198,7 @@ describe('<multipart-payload-editor>', function() {
     });
 
     it('adds an item when add file part button is clicked', async () => {
-      const node = element.shadowRoot.querySelectorAll('.add-actions .action-button')[0];
+      const node = element.shadowRoot.querySelector('.action-button[data-action="add-file"]');
       MockInteractions.tap(node);
       await nextFrame();
       assert.lengthOf(element.model, 3);
@@ -238,7 +238,7 @@ describe('<multipart-payload-editor>', function() {
     });
 
     it('adds an item when add file part button is clicked', async () => {
-      const node = element.shadowRoot.querySelectorAll('.add-actions .action-button')[1];
+      const node = element.shadowRoot.querySelector('.action-button[data-action="add-text"]');
       MockInteractions.tap(node);
       await nextFrame();
       assert.lengthOf(element.model, 3);
