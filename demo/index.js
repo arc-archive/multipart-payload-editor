@@ -17,14 +17,14 @@ class ApiDemo extends ApiDemoPageBase {
     super();
 
     this.initObservableProperties([
-      'mainReadOnly', 'mainDisabled', 'demoOutlined', 'demoLegacy',
+      'mainReadOnly', 'mainDisabled', 'demoOutlined', 'demoCompatibility',
       'narrow', 'allowCustom', 'noDocs', 'payloads', 'mediaTypes',
       'dataViewModel', 'mediaDropdownDisabled', 'mediaListSelected',
       'payloadResult'
     ]);
 
     this.componentName = 'form-data-editor';
-    this.demoStates = ['Filled', 'Outlined', 'Legacy'];
+    this.demoStates = ['Filled', 'Outlined', 'Anypoint'];
     this.mediaDropdownDisabled = true;
     this._mainDemoStateHandler = this._mainDemoStateHandler.bind(this);
     this._toggleMainOption = this._toggleMainOption.bind(this);
@@ -67,15 +67,15 @@ class ApiDemo extends ApiDemoPageBase {
     switch (state) {
       case 0:
         this.demoOutlined = false;
-        this.demoLegacy = false;
+        this.demoCompatibility = false;
         break;
       case 1:
         this.demoOutlined = true;
-        this.demoLegacy = false;
+        this.demoCompatibility = false;
         break;
       case 2:
         this.demoOutlined = false;
-        this.demoLegacy = true;
+        this.demoCompatibility = true;
         break;
     }
   }
@@ -111,7 +111,7 @@ class ApiDemo extends ApiDemoPageBase {
       demoStates,
       darkThemeActive,
       demoOutlined,
-      demoLegacy,
+      demoCompatibility,
       dataViewModel,
       payloadResult
     } = this;
@@ -137,7 +137,7 @@ class ApiDemo extends ApiDemoPageBase {
               ?readonly="${mainReadOnly}"
               ?disabled="${mainDisabled}"
               ?outlined="${demoOutlined}"
-              ?legacy="${demoLegacy}"
+              ?compatibility="${demoCompatibility}"
               .model="${dataViewModel}"
 
               @value-changed="${this._mainValueChanged}"

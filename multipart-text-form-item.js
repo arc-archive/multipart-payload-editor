@@ -82,7 +82,7 @@ class MultipartTextFormItem extends ValidatableMixin(LitElement) {
       docsOpened,
       readOnly,
       disabled,
-      legacy,
+      compatibility,
       outlined,
     } = this;
     const model = this.model || { schema: {} };
@@ -95,7 +95,7 @@ class MultipartTextFormItem extends ValidatableMixin(LitElement) {
           @value-changed="${this._typeHandler}"
           type="text"
           ?outlined="${outlined}"
-          ?legacy="${legacy}"
+          ?compatibility="${compatibility}"
           .readOnly="${readOnly}"
           .disabled=${disabled}
         >
@@ -112,7 +112,7 @@ class MultipartTextFormItem extends ValidatableMixin(LitElement) {
           .value="${name}"
           @value-changed="${this._nameHandler}"
           ?outlined="${outlined}"
-          ?legacy="${legacy}"
+          ?compatibility="${compatibility}"
           .readOnly="${readOnly}"
           .disabled=${disabled}
           >
@@ -125,7 +125,7 @@ class MultipartTextFormItem extends ValidatableMixin(LitElement) {
           .value="${value}"
           @value-changed="${this._valueHandler}"
           ?outlined="${outlined}"
-          ?legacy="${legacy}"
+          ?compatibility="${compatibility}"
           .readOnly="${readOnly}"
           .disabled=${disabled}
         ></api-property-form-item>
@@ -133,7 +133,7 @@ class MultipartTextFormItem extends ValidatableMixin(LitElement) {
           class="hint-icon"
           title="Toggle documentation"
           ?outlined="${outlined}"
-          ?legacy="${legacy}"
+          ?compatibility="${compatibility}"
           ?disabled="${disabled}"
           @click="${this.toggleDocumentation}">
           <iron-icon icon="arc:help"></iron-icon>
@@ -175,7 +175,11 @@ class MultipartTextFormItem extends ValidatableMixin(LitElement) {
        */
       hasFormData: { type: Boolean },
       /**
-       * Enables Anypoint legacy styling
+       * Enables compatibility with Anypoint components.
+       */
+      compatibility: { type: Boolean },
+      /**
+       * @deprecated Use `compatibility` instead
        */
       legacy: { type: Boolean },
       /**
@@ -191,6 +195,14 @@ class MultipartTextFormItem extends ValidatableMixin(LitElement) {
        */
       disabled: { type: Boolean }
     };
+  }
+  
+  get legacy() {
+    return this.compatibility;
+  }
+
+  set legacy(value) {
+    this.compatibility = value;
   }
   /**
    * Toggles documentation (if available)

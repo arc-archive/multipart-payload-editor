@@ -83,7 +83,7 @@ class MultipartFileFormItem extends ValidatableMixin(LitElement) {
       docsOpened,
       readOnly,
       disabled,
-      legacy,
+      compatibility,
       outlined,
       _hasFile
     } = this;
@@ -99,7 +99,7 @@ class MultipartFileFormItem extends ValidatableMixin(LitElement) {
           .value="${name}"
           @value-changed="${this._nameHandler}"
           ?outlined="${outlined}"
-          ?legacy="${legacy}"
+          ?compatibility="${compatibility}"
           .readOnly="${readOnly}"
           .disabled=${disabled}
           >
@@ -118,7 +118,7 @@ class MultipartFileFormItem extends ValidatableMixin(LitElement) {
           class="hint-icon"
           title="Toggle documentation"
           ?outlined="${outlined}"
-          ?legacy="${legacy}"
+          ?compatibility="${compatibility}"
           ?disabled="${disabled}"
           @click="${this.toggleDocumentation}">
           <iron-icon icon="arc:help"></iron-icon>
@@ -159,7 +159,11 @@ class MultipartFileFormItem extends ValidatableMixin(LitElement) {
        */
       docsOpened: { type: Boolean },
       /**
-       * Enables Anypoint legacy styling
+       * Enables compatibility with Anypoint components.
+       */
+      compatibility: { type: Boolean },
+      /**
+       * @deprecated Use `compatibility` instead
        */
       legacy: { type: Boolean },
       /**
@@ -175,6 +179,14 @@ class MultipartFileFormItem extends ValidatableMixin(LitElement) {
        */
       disabled: { type: Boolean }
     };
+  }
+
+  get legacy() {
+    return this.compatibility;
+  }
+
+  set legacy(value) {
+    this.compatibility = value;
   }
 
   get value() {

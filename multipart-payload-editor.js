@@ -123,7 +123,7 @@ class MultipartPayloadEditor extends ApiFormMixin(ValidatableMixin(LitElement)) 
     const {
       readOnly,
       disabled,
-      legacy,
+      compatibility,
       outlined,
     } = this;
     return html`<div class="form-item" data-file="${item.schema.isFile}">
@@ -136,7 +136,7 @@ class MultipartPayloadEditor extends ApiFormMixin(ValidatableMixin(LitElement)) 
         @value-changed="${this._valueChangeHandler}"
         .model="${item}"
         .outlined="${outlined}"
-        .legacy="${legacy}"
+        .compatibility="${compatibility}"
         .readOnly="${readOnly}"
         .disabled=${disabled}
         ></multipart-file-form-item>` :
@@ -151,7 +151,7 @@ class MultipartPayloadEditor extends ApiFormMixin(ValidatableMixin(LitElement)) 
         @type-changed="${this._typeChangeHandler}"
         .model="${item}"
         .outlined="${outlined}"
-        .legacy="${legacy}"
+        .compatibility="${compatibility}"
         .readOnly="${readOnly}"
         .disabled=${disabled}></multipart-text-form-item>`}
 
@@ -164,7 +164,7 @@ class MultipartPayloadEditor extends ApiFormMixin(ValidatableMixin(LitElement)) 
         slot="suffix"
         ?disabled="${readOnly || disabled}"
         ?outlined="${outlined}"
-        ?legacy="${legacy}">
+        ?compatibility="${compatibility}">
         <iron-icon icon="arc:remove-circle-outline"></iron-icon>
       </anypoint-icon-button>
     </div>`;
@@ -259,7 +259,11 @@ class MultipartPayloadEditor extends ApiFormMixin(ValidatableMixin(LitElement)) 
       messagePreview: { type: String },
       _messagePreviewCode: { type: String },
       /**
-       * Enables Anypoint legacy styling
+       * Enables compatibility with Anypoint components.
+       */
+      compatibility: { type: Boolean },
+      /**
+       * @deprecated Use `compatibility` instead
        */
       legacy: { type: Boolean },
       /**
@@ -275,6 +279,14 @@ class MultipartPayloadEditor extends ApiFormMixin(ValidatableMixin(LitElement)) 
        */
       disabled: { type: Boolean }
     };
+  }
+
+  get legacy() {
+    return this.compatibility;
+  }
+
+  set legacy(value) {
+    this.compatibility = value;
   }
 
   get model() {
