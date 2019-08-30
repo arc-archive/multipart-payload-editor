@@ -179,3 +179,12 @@
 
 
 
+## [3.0.3](https://github.com/advanced-rest-client/multipart-payload-editor/compare/2.0.0-preview...3.0.3) (2019-08-30)
+
+
+### Bug Fixes
+
+* removing spinner from imports ([5a6df8a](https://github.com/advanced-rest-client/multipart-payload-editor/commit/5a6df8a))
+
+
+
