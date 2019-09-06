@@ -181,7 +181,7 @@ class MultipartPayloadEditor extends ApiFormMixin(ValidatableMixin(LitElement)) 
           class="toggle-checkbox"
           .checked="${optionalOpened}"
           @checked-changed="${this._optionalHanlder}"
-          title="Shows or hides optional parameters">Show optional headers</anypoint-checkbox>
+          title="Shows or hides optional parameters">Show optional parameters</anypoint-checkbox>
       </div>` : undefined}
       <iron-form>
         <form enctype="multipart/form-data" method="post">
