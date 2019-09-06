@@ -125,8 +125,10 @@ class MultipartPayloadEditor extends ApiFormMixin(ValidatableMixin(LitElement)) 
       disabled,
       compatibility,
       outlined,
+      hasOptional
     } = this;
-    return html`<div class="form-item" data-file="${item.schema.isFile}">
+    const isOptional = this.computeIsOptional(hasOptional, item);
+    return html`<div class="form-item" data-file="${item.schema.isFile}" ?data-optional="${isOptional}">
     ${item.schema.isFile ?
       html`<multipart-file-form-item
         data-index="${index}"
@@ -171,8 +173,16 @@ class MultipartPayloadEditor extends ApiFormMixin(ValidatableMixin(LitElement)) 
   }
 
   _formTemplate() {
+    const { renderOptionalCheckbox, optionalOpened } = this;
     const model = this.model || [];
     return html`
+      ${renderOptionalCheckbox ? html`<div class="optional-checkbox">
+        <anypoint-checkbox
+          class="toggle-checkbox"
+          .checked="${optionalOpened}"
+          @checked-changed="${this._optionalHanlder}"
+          title="Shows or hides optional parameters">Show optional headers</anypoint-checkbox>
+      </div>` : undefined}
       <iron-form>
         <form enctype="multipart/form-data" method="post">
           ${model.map((item, index) => this._formItemTemplate(item, index))}
@@ -195,7 +205,7 @@ class MultipartPayloadEditor extends ApiFormMixin(ValidatableMixin(LitElement)) 
         part="content-action-button, code-content-action-button"
         class="action-button"
         data-action="add-file"
-        @click="${this.addFile}"
+        @click="${this._addFileHandler}"
         ?disabled="${disabled || readOnly || previewOpened}"
         emphasis="medium">Add file part</anypoint-button>
       <anypoint-button
@@ -373,6 +383,21 @@ class MultipartPayloadEditor extends ApiFormMixin(ValidatableMixin(LitElement)) 
     if (!this.model) {
       this.addFile();
     }
+  }
+  /**
+   * Overrides `ApiFormMixin.addCustom` to keep current value of `optionalOpened`
+   * @param {String} binding
+   * @param {Object} opts
+   */
+  addCustom(binding, opts) {
+    const old = this.optionalOpened;
+    super.addCustom(binding, opts);
+    this.optionalOpened = old;
+  }
+
+  _addFileHandler() {
+    this.addFile();
+    this.optionalOpened = true;
   }
   /**
    * Appends new file form row.
@@ -795,6 +820,10 @@ class MultipartPayloadEditor extends ApiFormMixin(ValidatableMixin(LitElement)) 
     const { value } = e.detail;
     this.model[index][prop] = value;
     this.model = [...this.model];
+  }
+
+  _optionalHanlder(e) {
+    this.optionalOpened = e.detail.value;
   }
 }
 window.customElements.define('multipart-payload-editor', MultipartPayloadEditor);

@@ -20,7 +20,7 @@ class ApiDemo extends ApiDemoPageBase {
       'mainReadOnly', 'mainDisabled', 'demoOutlined', 'demoCompatibility',
       'narrow', 'allowCustom', 'noDocs', 'payloads', 'mediaTypes',
       'dataViewModel', 'mediaDropdownDisabled', 'mediaListSelected',
-      'payloadResult'
+      'payloadResult', 'allowHideOptional'
     ]);
 
     this.componentName = 'form-data-editor';
@@ -113,7 +113,8 @@ class ApiDemo extends ApiDemoPageBase {
       demoOutlined,
       demoCompatibility,
       dataViewModel,
-      payloadResult
+      payloadResult,
+      allowHideOptional
     } = this;
     return html`<section role="main" class="documentation-section">
       <h2>API model demo</h2>
@@ -131,18 +132,16 @@ class ApiDemo extends ApiDemoPageBase {
             ?dark="${darkThemeActive}"
           >
 
-
             <multipart-payload-editor
               slot="content"
               ?readonly="${mainReadOnly}"
               ?disabled="${mainDisabled}"
               ?outlined="${demoOutlined}"
               ?compatibility="${demoCompatibility}"
+              ?allowHideOptional="${allowHideOptional}"
               .model="${dataViewModel}"
-
               @value-changed="${this._mainValueChanged}"
               @model-changed="${this._modelHandler}"></multipart-payload-editor>
-
 
             <label slot="options" id="mainOptionsLabel">Options</label>
 
@@ -166,6 +165,13 @@ class ApiDemo extends ApiDemoPageBase {
               name="narrow"
               @change="${this._toggleMainOption}"
               >Narrow view</anypoint-checkbox
+            >
+            <anypoint-checkbox
+              aria-describedby="mainOptionsLabel"
+              slot="options"
+              name="allowHideOptional"
+              @change="${this._toggleMainOption}"
+              >Allow hide optional</anypoint-checkbox
             >
           </arc-interactive-demo>
         </div>

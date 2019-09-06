@@ -20,6 +20,14 @@ describe('<multipart-payload-editor>', function() {
     `);
   }
 
+  async function allowHideOptionalFixture(model) {
+    return await fixture(html `
+      <multipart-payload-editor
+        allowhideoptional
+        .model="${model}"></multipart-payload-editor>
+    `);
+  }
+
   async function previewOpenedFixture() {
     const element = await fixture(html `
       <multipart-payload-editor></multipart-payload-editor>
@@ -731,6 +739,65 @@ describe('<multipart-payload-editor>', function() {
       const element = await basicFixture();
       const result = element._getLegacyFormData();
       assert.isUndefined(result);
+    });
+  });
+
+  describe('Allow hide optional', () => {
+    let model;
+    let element;
+    beforeEach(async () => {
+      model = [{
+        binding: 'type',
+        hasDescription: false,
+        name: 'i1',
+        required: true,
+        schema: {
+          enabled: true,
+          inputLabel: 'Property value 1',
+          isCustom: true,
+          isFile: true
+        }
+      }, {
+        binding: 'type',
+        hasDescription: false,
+        name: 'i2',
+        value: 'v2',
+        contentType: '',
+        required: false,
+        schema: {
+          enabled: true,
+          inputLabel: 'Property value 2',
+          isCustom: true,
+          isFile: false,
+          inputType: 'text'
+        }
+      }];
+      element = await allowHideOptionalFixture(model);
+    });
+
+    it('renders show optional checkbox', () => {
+      const node = element.shadowRoot.querySelector('.toggle-checkbox');
+      assert.ok(node);
+    });
+
+    it('first item is visible', () => {
+      const node = element.shadowRoot.querySelector('.form-item');
+      const result = getComputedStyle(node).display.trim();
+      assert.notEqual(result, 'none');
+    });
+
+    it('second item is not visible', () => {
+      const node = element.shadowRoot.querySelector('.form-item:nth-child(2)');
+      const result = getComputedStyle(node).display.trim();
+      assert.equal(result, 'none');
+    });
+
+    it('second item is visible when button toggled', async () => {
+      MockInteractions.tap(element.shadowRoot.querySelector('.toggle-checkbox'));
+      await nextFrame();
+      const node = element.shadowRoot.querySelector('.form-item:nth-child(2)');
+      const result = getComputedStyle(node).display.trim();
+      assert.notEqual(result, 'none');
     });
   });
 
