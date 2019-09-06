@@ -106,7 +106,11 @@ class MultipartFileFormItem extends ValidatableMixin(LitElement) {
             <label slot="label">Field name</label>
         </anypoint-input>
 
-        <anypoint-button emphasis="high" @click="${this._selectFile}" class="file-trigger">Choose file</anypoint-button>
+        <anypoint-button
+          emphasis="high"
+          @click="${this._selectFile}"
+          class="file-trigger"
+          ?disabled="${disabled || readOnly}">Choose file</anypoint-button>
 
         ${_hasFile ?
           html`<span
