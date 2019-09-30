@@ -130,7 +130,7 @@ class MultipartFileFormItem extends ValidatableMixin(LitElement) {
       </div>
 
       ${docsOpened && model.hasDescription ? html`<div class="docs">
-        <arc-marked .markdown="${model.description}">
+        <arc-marked .markdown="${model.description}" sanitize>
           <div slot="markdown-html" class="markdown-body"></div>
         </arc-marked>
       </div>` : undefined}
