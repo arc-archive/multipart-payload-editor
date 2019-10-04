@@ -114,7 +114,8 @@ class ApiDemo extends ApiDemoPageBase {
       demoCompatibility,
       dataViewModel,
       payloadResult,
-      allowHideOptional
+      allowHideOptional,
+      narrow
     } = this;
     return html`<section role="main" class="documentation-section">
       <h2>API model demo</h2>
@@ -139,6 +140,7 @@ class ApiDemo extends ApiDemoPageBase {
               ?outlined="${demoOutlined}"
               ?compatibility="${demoCompatibility}"
               ?allowHideOptional="${allowHideOptional}"
+              ?narrow="${narrow}"
               .model="${dataViewModel}"
               @value-changed="${this._mainValueChanged}"
               @model-changed="${this._modelHandler}"></multipart-payload-editor>
