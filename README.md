@@ -12,6 +12,11 @@ An AMF powered multipart payload editor for the HTTP request editor.
 <multipart-payload-editor></multipart-payload-editor>
 ```
 
+## Version compatibility
+
+This version only works with AMF model version 2 (AMF parser >= 4.0.0).
+For compatibility with previous model version use `3.x.x` version of the component.
+
 ## Usage
 
 ### Installation
