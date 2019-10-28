@@ -262,3 +262,18 @@
 
 
 
+# [4.0.0](https://github.com/advanced-rest-client/multipart-payload-editor/compare/2.0.0-preview...4.0.0) (2019-10-28)
+
+
+### Bug Fixes
+
+* fixing checkbox label ([3b63b39](https://github.com/advanced-rest-client/multipart-payload-editor/commit/3b63b39a38831e7e05c3d4f6f3f72aa5f1b7217e))
+* removing spinner from imports ([5a6df8a](https://github.com/advanced-rest-client/multipart-payload-editor/commit/5a6df8a41c0d12cd6580ede01e3369fdbfd4d589))
+
+
+### Features
+
+* adding support for hidding optional parameetrs ([cf286d8](https://github.com/advanced-rest-client/multipart-payload-editor/commit/cf286d869894021a36f553fbfa3d90a853513cf6))
+
+
+
