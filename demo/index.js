@@ -54,9 +54,9 @@ class ApiDemo extends ApiDemoPageBase {
     const operation = this.helper._computeMethodModel(webApi, id);
     const expects = this.helper._computeExpects(operation);
     const payload = this.helper._computePayload(expects)[0];
-    const skey = this.helper._getAmfKey(this.helper.ns.raml.vocabularies.http + 'schema');
+    const skey = this.helper._getAmfKey(this.helper.ns.aml.vocabularies.shapes.schema);
     const schema = this.helper._resolve(payload[skey][0]);
-    const key = this.helper._getAmfKey(this.helper.ns.w3.shacl.name + 'property');
+    const key = this.helper._getAmfKey(this.helper.ns.w3.shacl.property);
     const props = this.helper._ensureArray(schema[key]);
     const model = document.getElementById('transformer').computeViewModel(props);
     this.dataViewModel = model;

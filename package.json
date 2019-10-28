@@ -1,7 +1,7 @@
 {
   "name": "@advanced-rest-client/multipart-payload-editor",
   "description": "Multipart payload editor for ARC body editor",
-  "version": "3.0.8",
+  "version": "4.0.0",
   "license": "Apache-2.0",
   "main": "multipart-payload-editor.js",
   "keywords": [
@@ -38,7 +38,7 @@
     "@anypoint-web-components/validatable-mixin": "^1.0.2",
     "@api-components/api-form-mixin": "^3.0.3",
     "@api-components/api-property-form-item": "^3.0.10",
-    "@api-components/api-view-model-transformer": "^3.0.5",
+    "@api-components/api-view-model-transformer": "^4.0.2",
     "@polymer/iron-form": "^3.0.0",
     "@polymer/paper-toast": "^3.0.0",
     "@polymer/prism-element": "^3.0.0",
@@ -52,8 +52,8 @@
     "@advanced-rest-client/prettier-config": "^0.1.0",
     "@advanced-rest-client/testing-karma-sl": "^1.0.6",
     "@anypoint-web-components/anypoint-checkbox": "^1.0.1",
-    "@api-components/api-model-generator": "^0.1.13",
-    "@api-components/api-navigation": "^3.1.1",
+    "@api-components/api-model-generator": "^0.2.0-preview.1",
+    "@api-components/api-navigation": "^4.0.0",
     "@commitlint/cli": "^8.2.0",
     "@commitlint/config-conventional": "^8.2.0",
     "@open-wc/testing": "^2.3.8",
