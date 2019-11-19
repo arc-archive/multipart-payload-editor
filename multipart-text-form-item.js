@@ -32,7 +32,7 @@ import '@api-components/api-property-form-item/api-property-form-item.js';
  * @appliesMixin ValidatableMixin
  */
 class MultipartTextFormItem extends ValidatableMixin(LitElement) {
-  static get styles() {
+  get styles() {
     return [
       markdownStyles,
       formStyles,
@@ -147,7 +147,7 @@ class MultipartTextFormItem extends ValidatableMixin(LitElement) {
       outlined,
     } = this;
     const model = this.model || { schema: {} };
-    return html`
+    return html`<style>${this.styles}</style>
     ${this._mimeSeelctorTemplate()}
     <div class="value-row">
       <div class="inputs">
