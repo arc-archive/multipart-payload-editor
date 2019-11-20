@@ -28,7 +28,7 @@ import '@advanced-rest-client/arc-marked/arc-marked.js';
  * @appliesMixin ValidatableMixin
  */
 class MultipartFileFormItem extends ValidatableMixin(LitElement) {
-  static get styles() {
+  get styles() {
     return [
       markdownStyles,
       formStyles,
@@ -119,7 +119,7 @@ class MultipartFileFormItem extends ValidatableMixin(LitElement) {
       outlined
     } = this;
     const model = this.model || { };
-    return html`
+    return html`<style>${this.styles}</style>
     <div class="inputs">
       <anypoint-input
         class="name-field"

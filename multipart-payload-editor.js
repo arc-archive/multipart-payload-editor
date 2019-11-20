@@ -71,7 +71,7 @@ try {
  * @memberof ApiComponents
  */
 class MultipartPayloadEditor extends ApiFormMixin(ValidatableMixin(LitElement)) {
-  static get styles() {
+  get styles() {
     return [
       prismStyles,
       formStyles,
@@ -224,7 +224,7 @@ class MultipartPayloadEditor extends ApiFormMixin(ValidatableMixin(LitElement)) 
       disabled,
     } = this;
 
-    return html`
+    return html`<style>${this.styles}</style>
     <div class="editor-actions">
       <anypoint-button
         part="content-action-button, code-content-action-button"
