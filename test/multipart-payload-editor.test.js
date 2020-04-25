@@ -5,11 +5,12 @@ import {
   aTimeout,
   html
 } from '@open-wc/testing';
-import * as sinon from 'sinon/pkg/sinon-esm.js';
+import * as sinon from 'sinon';
 import * as MockInteractions from '@polymer/iron-test-helpers/mock-interactions.js';
+import '../multipart-payload-editor.js';
 import {
   hasFormDataSupport
-} from '../multipart-payload-editor.js';
+} from '../src/MultipartPayloadEditor.js';
 
 const hasPartsApi = 'part' in document.createElement('span');
 

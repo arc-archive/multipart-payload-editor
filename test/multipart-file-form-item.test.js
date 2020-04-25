@@ -4,7 +4,7 @@ import {
   nextFrame,
   html
 } from '@open-wc/testing';
-import * as sinon from 'sinon/pkg/sinon-esm.js';
+import * as sinon from 'sinon';
 import * as MockInteractions from '@polymer/iron-test-helpers/mock-interactions.js';
 import '../multipart-file-form-item.js';
 
@@ -162,18 +162,20 @@ describe('<multipart-file-form-item>', function() {
     });
 
     it('returns string for fileTypes', () => {
-      const result = element._computeAccept({
+      element.model = {
         fileTypes: ['application/png', 'application/jpeg']
-      });
+      };
+      const result = element._computeAccept();
       assert.equal(result, 'application/png,application/jpeg');
     });
 
     it('returns string for fixedFacets', () => {
-      const result = element._computeAccept({
+      element.model = {
         fixedFacets: {
           fileTypes: ['application/png', 'application/jpeg']
         }
-      });
+      };
+      const result = element._computeAccept();
       assert.equal(result, 'application/png,application/jpeg');
     });
   });
