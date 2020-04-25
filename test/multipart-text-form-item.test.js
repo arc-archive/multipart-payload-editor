@@ -206,7 +206,9 @@ describe('<multipart-text-form-item>', function() {
   describe('a11y', () => {
     it('is accessible with data', async () => {
       const element = await basicFixture();
-      await assert.isAccessible(element);
+      await assert.isAccessible(element, {
+        ignoredRules: ['color-contrast']
+      });
     });
   });
 });

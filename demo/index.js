@@ -1,24 +1,18 @@
-import { html, render } from 'lit-html';
-import { ApiDemoPageBase } from '@advanced-rest-client/arc-demo-helper/ApiDemoPage.js';
-import { LitElement } from 'lit-element';
-import { AmfHelperMixin } from '@api-components/amf-helper-mixin/amf-helper-mixin.js';
-import '@api-components/api-navigation/api-navigation.js';
+import { html } from 'lit-html';
+import { ApiDemoPage } from '@advanced-rest-client/arc-demo-helper';
 import '@advanced-rest-client/arc-demo-helper/arc-interactive-demo.js';
 import '@anypoint-web-components/anypoint-styles/colors.js';
 import '@anypoint-web-components/anypoint-checkbox/anypoint-checkbox.js';
 import '@api-components/api-view-model-transformer/api-view-model-transformer.js';
 import '../multipart-payload-editor.js';
 
-class DemoElement extends AmfHelperMixin(LitElement) {}
-window.customElements.define('demo-element', DemoElement);
-
-class ApiDemo extends ApiDemoPageBase {
+class ApiDemo extends ApiDemoPage {
   constructor() {
     super();
 
     this.initObservableProperties([
-      'mainReadOnly', 'mainDisabled', 'demoOutlined', 'demoCompatibility',
-      'narrow', 'allowCustom', 'noDocs', 'payloads', 'mediaTypes',
+      'readOnly', 'disabled', 'outlined', 'compatibility',
+      'allowCustom', 'noDocs', 'payloads', 'mediaTypes',
       'dataViewModel', 'mediaDropdownDisabled', 'mediaListSelected',
       'payloadResult', 'allowHideOptional'
     ]);
@@ -26,17 +20,19 @@ class ApiDemo extends ApiDemoPageBase {
     this.componentName = 'form-data-editor';
     this.demoStates = ['Filled', 'Outlined', 'Anypoint'];
     this.mediaDropdownDisabled = true;
-    this._mainDemoStateHandler = this._mainDemoStateHandler.bind(this);
-    this._toggleMainOption = this._toggleMainOption.bind(this);
+    this.readOnly = false;
+    this.disabled = false;
+    this.allowHideOptional = false;
+
     this._modelHandler = this._modelHandler.bind(this);
     this._mainValueChanged = this._mainValueChanged.bind(this);
   }
 
-  get helper() {
-    if (!this.__helper) {
-      this.__helper = document.getElementById('helper');
-    }
-    return this.__helper;
+  _mainDemoStateHandler(e) {
+    const state = e.detail.value;
+    this.outlined = state === 1;
+    this.compatibility = state === 2;
+    this._updateCompatibility();
   }
 
   _navChanged(e) {
@@ -50,39 +46,17 @@ class ApiDemo extends ApiDemoPageBase {
   }
 
   setData(id) {
-    const webApi = this.helper._computeWebApi(this.amf);
-    const operation = this.helper._computeMethodModel(webApi, id);
-    const expects = this.helper._computeExpects(operation);
-    const payload = this.helper._computePayload(expects)[0];
-    const skey = this.helper._getAmfKey(this.helper.ns.aml.vocabularies.shapes.schema);
-    const schema = this.helper._resolve(payload[skey][0]);
-    const key = this.helper._getAmfKey(this.helper.ns.w3.shacl.property);
-    const props = this.helper._ensureArray(schema[key]);
-    const model = document.getElementById('transformer').computeViewModel(props);
+    const webApi = this._computeWebApi(this.amf);
+    const operation = this._computeMethodModel(webApi, id);
+    const expects = this._computeExpects(operation);
+    const payload = this._computePayload(expects)[0];
+    const skey = this._getAmfKey(this.ns.aml.vocabularies.shapes.schema);
+    const schema = this._resolve(payload[skey][0]);
+    const key = this._getAmfKey(this.ns.w3.shacl.property);
+    const props = this._ensureArray(schema[key]);
+    const node = /** @type any */ (document.getElementById('transformer'));
+    const model = node.computeViewModel(props);
     this.dataViewModel = model;
-  }
-
-  _mainDemoStateHandler(e) {
-    const state = e.detail.value;
-    switch (state) {
-      case 0:
-        this.demoOutlined = false;
-        this.demoCompatibility = false;
-        break;
-      case 1:
-        this.demoOutlined = true;
-        this.demoCompatibility = false;
-        break;
-      case 2:
-        this.demoOutlined = false;
-        this.demoCompatibility = true;
-        break;
-    }
-  }
-
-  _toggleMainOption(e) {
-    const { name, checked } = e.target;
-    this[name] = checked;
   }
 
   _mainValueChanged(e) {
@@ -106,102 +80,90 @@ class ApiDemo extends ApiDemoPageBase {
 
   _demoTemplate() {
     const {
-      mainReadOnly,
-      mainDisabled,
+      readOnly,
+      disabled,
       demoStates,
       darkThemeActive,
-      demoOutlined,
-      demoCompatibility,
+      outlined,
+      compatibility,
       dataViewModel,
       payloadResult,
       allowHideOptional,
       narrow
     } = this;
-    return html`<section role="main" class="documentation-section">
-      <h2>API model demo</h2>
+    return html`<section class="documentation-section">
+      <h3>API model demo</h3>
       <p>
-        This demo lets you preview the API URL parameters editor element with various
+        This demo lets you preview the Multipart body editor element with various
         configuration options.
       </p>
 
-      <section class="horizontal-section-container centered main">
-        ${this._apiNavigationTemplate()}
-        <div class="demo-container">
-          <arc-interactive-demo
-            .states="${demoStates}"
-            @state-chanegd="${this._mainDemoStateHandler}"
-            ?dark="${darkThemeActive}"
-          >
 
-            <multipart-payload-editor
-              slot="content"
-              ?readonly="${mainReadOnly}"
-              ?disabled="${mainDisabled}"
-              ?outlined="${demoOutlined}"
-              ?compatibility="${demoCompatibility}"
-              ?allowHideOptional="${allowHideOptional}"
-              ?narrow="${narrow}"
-              .model="${dataViewModel}"
-              @value-changed="${this._mainValueChanged}"
-              @model-changed="${this._modelHandler}"></multipart-payload-editor>
+      <arc-interactive-demo
+        .states="${demoStates}"
+        @state-chanegd="${this._mainDemoStateHandler}"
+        ?dark="${darkThemeActive}"
+      >
 
-            <label slot="options" id="mainOptionsLabel">Options</label>
+        <multipart-payload-editor
+          slot="content"
+          ?readonly="${readOnly}"
+          ?disabled="${disabled}"
+          ?outlined="${outlined}"
+          ?compatibility="${compatibility}"
+          ?allowHideOptional="${allowHideOptional}"
+          ?narrow="${narrow}"
+          .model="${dataViewModel}"
+          @value-changed="${this._mainValueChanged}"
+          @model-changed="${this._modelHandler}"></multipart-payload-editor>
 
-            <anypoint-checkbox
-              aria-describedby="mainOptionsLabel"
-              slot="options"
-              name="mainReadOnly"
-              @change="${this._toggleMainOption}"
-              >Read only</anypoint-checkbox
-            >
-            <anypoint-checkbox
-              aria-describedby="mainOptionsLabel"
-              slot="options"
-              name="mainDisabled"
-              @change="${this._toggleMainOption}"
-              >Disabled</anypoint-checkbox
-            >
-            <anypoint-checkbox
-              aria-describedby="mainOptionsLabel"
-              slot="options"
-              name="narrow"
-              @change="${this._toggleMainOption}"
-              >Narrow view</anypoint-checkbox
-            >
-            <anypoint-checkbox
-              aria-describedby="mainOptionsLabel"
-              slot="options"
-              name="allowHideOptional"
-              @change="${this._toggleMainOption}"
-              >Allow hide optional</anypoint-checkbox
-            >
-          </arc-interactive-demo>
-        </div>
-      </section>
+        <label slot="options" id="mainOptionsLabel">Options</label>
+
+        <anypoint-checkbox
+          aria-describedby="mainOptionsLabel"
+          slot="options"
+          name="readOnly"
+          @change="${this._toggleMainOption}"
+          >Read only</anypoint-checkbox
+        >
+        <anypoint-checkbox
+          aria-describedby="mainOptionsLabel"
+          slot="options"
+          name="disabled"
+          @change="${this._toggleMainOption}"
+          >Disabled</anypoint-checkbox
+        >
+        <anypoint-checkbox
+          aria-describedby="mainOptionsLabel"
+          slot="options"
+          name="narrow"
+          @change="${this._toggleMainOption}"
+          >Narrow view</anypoint-checkbox
+        >
+        <anypoint-checkbox
+          aria-describedby="mainOptionsLabel"
+          slot="options"
+          name="allowHideOptional"
+          @change="${this._toggleMainOption}"
+          >Allow hide optional</anypoint-checkbox
+        >
+      </arc-interactive-demo>
 
       <section>
         <h3>Generated data</h3>
-        <output>
-${payloadResult ? payloadResult : 'Value not ready'}
-        </output>
+        <output>${payloadResult ? payloadResult : 'Value not ready'}</output>
       </section>
     </section>`;
   }
 
-  _render() {
-    const {
-      amf
-    } = this;
-    render(html`
-      ${this.headerTemplate()}
+  contentTemplate() {
+    const { amf } = this;
+    return html`
+    <api-view-model-transformer id="transformer" .amf="${amf}"></api-view-model-transformer>
 
-      <demo-element id="helper" .amf="${amf}"></demo-element>
-      <api-view-model-transformer id="transformer" .amf="${amf}"></api-view-model-transformer>
-
-      ${this._demoTemplate()}
-      `, document.querySelector('#demo'));
+    <h2 class="centered main">Multipart form editor</h2>
+    ${this._demoTemplate()}`;
   }
 }
 const instance = new ApiDemo();
 instance.render();
-window.demoInstance = instance;
