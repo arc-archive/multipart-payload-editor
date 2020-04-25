@@ -19,6 +19,7 @@ import { ApiFormMixin } from '@api-components/api-form-mixin/api-form-mixin.js';
 import formStyles from '@api-components/api-form-mixin/api-form-styles.js';
 import prismStyles from '@advanced-rest-client/prism-highlight/prism-styles.js';
 import { removeCircleOutline } from '@advanced-rest-client/arc-icons/ArcIcons.js';
+import { ApiViewModel } from '@api-components/api-view-model-transformer';
 import '@polymer/iron-form/iron-form.js';
 import '@anypoint-web-components/anypoint-button/anypoint-icon-button.js';
 import '@polymer/paper-toast/paper-toast.js';
@@ -336,7 +337,7 @@ export class MultipartPayloadEditor extends ApiFormMixin(ValidatableMixin(LitEle
       };
     }
     modelItem.value = value.result;
-    modelItem = this._createModelObject(modelItem, {});
+    modelItem = this._createModelObject(modelItem);
     if (!modelItem.schema) {
       modelItem.schema = {};
     }
@@ -355,18 +356,12 @@ export class MultipartPayloadEditor extends ApiFormMixin(ValidatableMixin(LitEle
    * `api-view-model-transformer` to build model item.
    * This assumes that the transformer element is already in the DOM.
    *
-   * @param {Object} defs Defaults for model
+   * @param {Object=} defs Defaults for model
    * @return {Object} Tranformed object.
    */
   _createModelObject(defs) {
-    const e = new CustomEvent('api-property-model-build', {
-      bubbles: true,
-      composed: true,
-      cancelable: true,
-      detail: defs
-    });
-    this.dispatchEvent(e);
-    return e.detail;
+    const worker = new ApiViewModel();
+    return worker.buildProperty(defs);
   }
   /**
    * Transforms `Blob` to string.

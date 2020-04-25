@@ -802,6 +802,26 @@ describe('<multipart-payload-editor>', function() {
     });
   });
 
+  describe('_createModelObject()', () => {
+    let element;
+    beforeEach(async () => {
+      element = await basicFixture();
+    });
+
+    it('returns an object whe no default values', () => {
+      const result = element._createModelObject();
+      assert.typeOf(result, 'object');
+    });
+
+    it('returns an object with file definition', () => {
+      const init = {
+        type: 'file'
+      };
+      const result = element._createModelObject(init);
+      assert.equal(result.type, 'file');
+    });
+  });
+
   describe('onmodel', () => {
     let element;
     beforeEach(async () => {
