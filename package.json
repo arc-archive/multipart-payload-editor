@@ -27,23 +27,23 @@
     "email": "arc@mulesoft.com"
   },
   "dependencies": {
-    "@advanced-rest-client/arc-icons": "^3.3.3",
-    "@advanced-rest-client/arc-marked": "^1.1.1",
-    "@advanced-rest-client/clipboard-copy": "^3.1.0",
-    "@advanced-rest-client/markdown-styles": "^3.1.5",
+    "@advanced-rest-client/arc-icons": "^3.0.5",
+    "@advanced-rest-client/arc-marked": "^1.0.6",
+    "@advanced-rest-client/clipboard-copy": "^3.0.1",
+    "@advanced-rest-client/markdown-styles": "^3.1.2",
     "@advanced-rest-client/multipart-payload-transformer": "^3.0.0",
-    "@advanced-rest-client/prism-highlight": "^4.1.2",
-    "@anypoint-web-components/anypoint-button": "^1.2.0",
-    "@anypoint-web-components/anypoint-input": "^0.2.24",
+    "@advanced-rest-client/prism-highlight": "^4.0.2",
+    "@anypoint-web-components/anypoint-button": "^1.0.15",
+    "@anypoint-web-components/anypoint-input": "^0.2.14",
     "@anypoint-web-components/validatable-mixin": "^1.0.2",
     "@api-components/api-form-mixin": "^3.0.4",
-    "@api-components/api-property-form-item": "^3.0.16",
+    "@api-components/api-property-form-item": "^3.0.12",
     "@api-components/api-view-model-transformer": "^4.1.0",
     "@polymer/iron-form": "^3.0.0",
     "@polymer/paper-toast": "^3.0.0",
     "@polymer/prism-element": "^3.0.0",
-    "lit-element": "^2.5.1",
-    "lit-html": "^1.4.1",
-    "prismjs": "^1.23.0"
+    "lit-element": "^2.3.1",
+    "lit-html": "^1.2.1",
+    "prismjs": "^1.20.0"
   }
 }
