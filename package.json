@@ -1,7 +1,7 @@
 {
   "name": "@advanced-rest-client/multipart-payload-editor",
   "description": "Multipart payload editor for ARC body editor",
-  "version": "4.1.0",
+  "version": "4.1.1",
   "license": "Apache-2.0",
   "main": "multipart-payload-editor.js",
   "keywords": [
@@ -48,13 +48,15 @@
   },
   "devDependencies": {
     "@advanced-rest-client/arc-demo-helper": "^2.2.6",
-    "@api-components/api-model-generator": "^0.2.10",
+    "@api-components/api-model-generator": "^0.2.8",
     "@api-components/api-navigation": "^4.2.4",
     "@open-wc/eslint-config": "^4.0.1",
     "@open-wc/testing": "^2.5.32",
+    "@polymer/iron-test-helpers": "^3.0.1",
     "@web/dev-server": "^0.1.4",
     "@web/test-runner": "^0.13.4",
     "@web/test-runner-playwright": "^0.8.0",
+    "amf-client-js": "^4.6.0",
     "eslint": "^7.16.0",
     "eslint-config-prettier": "^8.3.0",
     "husky": "^6.0.0",
