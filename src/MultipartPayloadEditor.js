@@ -474,6 +474,14 @@ export class MultipartPayloadEditor extends ApiFormMixin(ValidatableMixin(LitEle
     const formData = this.createFormData(model);
     this.value = formData;
     this.__internalChange = false;
+    this.dispatchModelChangedEvent(model);
+  }
+  /**
+   * Dispatches event to notify model has changed in component.
+   * @param {Array} model 
+   */
+  dispatchModelChangedEvent(model) {
+    this.dispatchEvent(new CustomEvent('modelchanged', { bubbles: true, composed: true, detail: { value: model } }));
   }
   /**
    * Generates FormData from the model.
