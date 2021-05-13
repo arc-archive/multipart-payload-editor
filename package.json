@@ -1,7 +1,7 @@
 {
   "name": "@advanced-rest-client/multipart-payload-editor",
   "description": "Multipart payload editor for ARC body editor",
-  "version": "4.1.0",
+  "version": "4.1.1",
   "license": "Apache-2.0",
   "main": "multipart-payload-editor.js",
   "keywords": [
