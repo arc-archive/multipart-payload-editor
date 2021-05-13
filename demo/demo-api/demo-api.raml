@@ -1,0 +1,29 @@
+#%RAML 1.0
+title: My super cool, example API
+version: v1
+baseUri: http://api.domain.com/
+
+types:
+  Person:
+    properties:
+      name:
+        type: string
+        description: Name of the person
+      email:
+        type: string
+      image:
+        type: file
+        fileTypes: ['image/jpeg', 'image/png']
+        description: Person image
+      age:
+        type: number
+        description: Age of the person.
+      optParam:
+        type: number
+        required: false
+        description: Age of the person.
+/multipart:
+  post:
+    body:
+      multipart/form-data:
+        type: Person
