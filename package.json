@@ -1,7 +1,7 @@
 {
   "name": "@advanced-rest-client/multipart-payload-editor",
   "description": "Multipart payload editor for ARC body editor",
-  "version": "4.1.1",
+  "version": "4.1.2",
   "license": "Apache-2.0",
   "main": "multipart-payload-editor.js",
   "keywords": [
@@ -35,6 +35,7 @@
     "@advanced-rest-client/prism-highlight": "^4.0.2",
     "@anypoint-web-components/anypoint-button": "^1.0.15",
     "@anypoint-web-components/anypoint-input": "^0.2.14",
+    "@anypoint-web-components/anypoint-switch": "^0.1.9",
     "@anypoint-web-components/validatable-mixin": "^1.0.2",
     "@api-components/api-form-mixin": "^3.0.4",
     "@api-components/api-property-form-item": "^3.0.12",
