@@ -327,7 +327,7 @@ describe('<multipart-payload-editor>', function() {
         }
       }]);
       element.value = fd;
-      await aTimeout(10);
+      await aTimeout(100);
       const content = await element._generatePreview();
       assert.typeOf(content, 'string');
     });
