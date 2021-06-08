@@ -227,9 +227,9 @@ export class MultipartFileFormItem extends ValidatableMixin(LitElement) {
       readOnly,
       disabled,
       compatibility,
-      outlined,
-      model
+      outlined
     } = this;
+    const model = this.model || {};
     const {required} = model;
     const fieldName = `Field name${required ? '*' : ''}`
     return html`<anypoint-input
