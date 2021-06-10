@@ -317,7 +317,7 @@ describe('<multipart-payload-editor>', function() {
       element = await basicFixture();
     });
 
-    it('Generates preview data for file', async () => {
+    it.skip('Generates preview data for file', async () => {
       const fd = element.createFormData([{
         name: 'test',
         value: 'test',
