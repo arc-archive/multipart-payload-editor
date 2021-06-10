@@ -1,0 +1,32 @@
+#%RAML 1.0
+title: Site Risk Analytics API
+description: 
+
+/site-risk-analytics:
+  post:
+    description: Upload files into specified target location
+    body:
+      multipart/form-data:
+        properties:
+          protocolnumber:
+            type: string
+            required: true
+            example: "SyntheaStudy"
+          kris:
+            type: string
+            required: true
+            example: "OverdueAction,TOT_PROTDEV_MAJ_CRITIC_NBR,AdverseEvent,SeriousAdverseEvent,NumQuery,Total No. of Screen Failures"
+          sitesignalstrength:
+            type: string
+            required: true
+            example: "20"
+          analyticsfile:
+            description: This file needs to be uploaded into target location
+            type: file
+            fileTypes: ['*/*']
+            maxLength: 10485760 # 10 MB = 10485760 Bytes
+            required: true
+    responses:
+      200:
+        body:
+          application/json:
