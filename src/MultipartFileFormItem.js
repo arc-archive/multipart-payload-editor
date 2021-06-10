@@ -227,12 +227,15 @@ export class MultipartFileFormItem extends ValidatableMixin(LitElement) {
       readOnly,
       disabled,
       compatibility,
-      outlined,
+      outlined
     } = this;
+    const model = this.model || {};
+    const {required} = model;
+    const fieldName = `Field name${required ? '*' : ''}`
     return html`<anypoint-input
       class="name-field"
-      invalidmessage="The name is required"
-      required
+      invalidmessage="Value is required but currently empty."
+      ?required="${required}"
       autovalidate
       .value="${name}"
       @value-changed="${this._nameHandler}"
@@ -241,7 +244,7 @@ export class MultipartFileFormItem extends ValidatableMixin(LitElement) {
       .readOnly="${readOnly}"
       .disabled=${disabled}
       >
-        <label slot="label">Field name</label>
+        <label slot="label">${fieldName}</label>
     </anypoint-input>`;
   }
 
