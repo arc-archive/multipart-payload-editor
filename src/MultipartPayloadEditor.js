@@ -673,11 +673,14 @@ export class MultipartPayloadEditor extends ApiFormMixin(ValidatableMixin(LitEle
     return html`<div class="form-item" data-file="${item.schema.isFile}" ?data-optional="${isOptional}">
     ${item.schema.isFile ?
       html`<multipart-file-form-item
+        .hasFormData="${hasFormDataSupport}"
         data-index="${index}"
         .name="${item.name}"
         @name-changed="${this._nameChangeHandler}"
         .value="${item.value}"
         @value-changed="${this._valueChangeHandler}"
+        .type="${item.contentType}"
+        @type-changed="${this._typeChangeHandler}"
         .model="${item}"
         ?outlined="${outlined}"
         ?compatibility="${compatibility}"
