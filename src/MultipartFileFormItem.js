@@ -79,7 +79,15 @@ export class MultipartFileFormItem extends ValidatableMixin(LitElement) {
       /**
        * When set all controls are disabled in the form
        */
-      disabled: { type: Boolean }
+      disabled: { type: Boolean },
+      /**
+       * A content type of the form field to be presented in the Multipart request.
+       */
+      type: { type: String },
+      /**
+       * When set it will also renders mime type selector for the input data.
+       */
+      hasFormData: { type: Boolean },
     };
   }
 
@@ -104,6 +112,20 @@ export class MultipartFileFormItem extends ValidatableMixin(LitElement) {
     this._value = value;
     this._hasFile = this._computeHasFile(value);
     this.requestUpdate('value', old);
+  }
+
+  get type() {
+    return this._type;
+  }
+
+  set type(value) {
+    const old = this._type;
+    /* istanbul ignore if */
+    if (old === value) {
+      return;
+    }
+    this._type = value;
+    this.requestUpdate('type', old);
   }
 
   /**
@@ -165,6 +187,18 @@ export class MultipartFileFormItem extends ValidatableMixin(LitElement) {
     file.click();
   }
 
+  _updateFileType(file) {
+    const {type} = this
+
+    if (type === undefined || type === file.type) {
+      return file
+    }
+
+    // should update file if content type defined
+    const newType = type || this._defaultType
+    return new Blob([file], {type: newType})
+  }
+
   /**
    * A handler to file change event for input[type="file"].
    * This will update files array for corresponding `this.filesList` array object.
@@ -173,8 +207,10 @@ export class MultipartFileFormItem extends ValidatableMixin(LitElement) {
    */
   _fileObjectChanged(e) {
     const target = /** @type HTMLInputElement */ (e.target);
-    const file = target.files[0];
+    const targetFile = target.files[0];
+    const file = this._updateFileType(targetFile);
     this.value = file;
+    this._defaultType = targetFile.type;
     this._notifyChange(file);
   }
   /**
@@ -208,8 +244,56 @@ export class MultipartFileFormItem extends ValidatableMixin(LitElement) {
     }));
   }
 
+  _changeHandler(e) {
+    const { value } = e.detail;
+    if (this.type === value) {
+      return;
+    }
+    this.type = value;
+    this.dispatchEvent(new CustomEvent(`type-changed`, {
+      detail: {
+        value
+      }
+    }));
+
+    if (this.value && this.value.type !== value) {
+      const file = this._updateFileType(this.value);
+      this.value = file
+      this._notifyChange(file);
+    }
+  }
+
+  _mimeSelectorTemplate() {
+    const {
+      hasFormData,
+      type,
+      readOnly,
+      disabled,
+      compatibility,
+      outlined,
+    } = this;
+    if (!hasFormData) {
+      return '';
+    }
+    return html`<div class="mime-selector">
+      <anypoint-input
+        class="type-field"
+        .value="${type}"
+        @value-changed="${this._changeHandler}"
+        type="text"
+        ?outlined="${outlined}"
+        ?compatibility="${compatibility}"
+        .readOnly="${readOnly}"
+        .disabled=${disabled}
+      >
+        <label slot="label">Content type (Optional)</label>
+      </anypoint-input>
+    </div>`;
+  }
+
   render() {
     return html`<style>${this.styles}</style>
+    ${this._mimeSelectorTemplate()}
     <div class="inputs">
       ${this._nameTemplate()}
       ${this._triggerTemplate()}
@@ -227,12 +311,15 @@ export class MultipartFileFormItem extends ValidatableMixin(LitElement) {
       readOnly,
       disabled,
       compatibility,
-      outlined,
+      outlined
     } = this;
+    const model = this.model || {};
+    const {required} = model;
+    const fieldName = `Field name${required ? '*' : ''}`
     return html`<anypoint-input
       class="name-field"
-      invalidmessage="The name is required"
-      required
+      invalidmessage="Value is required but currently empty."
+      ?required="${required}"
       autovalidate
       .value="${name}"
       @value-changed="${this._nameHandler}"
@@ -241,7 +328,7 @@ export class MultipartFileFormItem extends ValidatableMixin(LitElement) {
       .readOnly="${readOnly}"
       .disabled=${disabled}
       >
-        <label slot="label">Field name</label>
+        <label slot="label">${fieldName}</label>
     </anypoint-input>`;
   }
 

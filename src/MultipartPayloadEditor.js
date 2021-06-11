@@ -22,6 +22,7 @@ import { removeCircleOutline } from '@advanced-rest-client/arc-icons/ArcIcons.js
 import { ApiViewModel } from '@api-components/api-view-model-transformer';
 import '@polymer/iron-form/iron-form.js';
 import '@anypoint-web-components/anypoint-button/anypoint-icon-button.js';
+import '@anypoint-web-components/anypoint-switch/anypoint-switch.js';
 import '@polymer/paper-toast/paper-toast.js';
 import '@advanced-rest-client/multipart-payload-transformer/multipart-payload-transformer.js';
 import '@advanced-rest-client/clipboard-copy/clipboard-copy.js';
@@ -651,8 +652,8 @@ export class MultipartPayloadEditor extends ApiFormMixin(ValidatableMixin(LitEle
     this.model = [...this.model];
   }
 
-  _optionalHanlder(e) {
-    this.optionalOpened = e.detail.value;
+  _optionalHandler(e) {
+    this.optionalOpened = e.target.checked;
   }
 
   _previewTemplate() {
@@ -672,11 +673,14 @@ export class MultipartPayloadEditor extends ApiFormMixin(ValidatableMixin(LitEle
     return html`<div class="form-item" data-file="${item.schema.isFile}" ?data-optional="${isOptional}">
     ${item.schema.isFile ?
       html`<multipart-file-form-item
+        .hasFormData="${hasFormDataSupport}"
         data-index="${index}"
         .name="${item.name}"
         @name-changed="${this._nameChangeHandler}"
         .value="${item.value}"
         @value-changed="${this._valueChangeHandler}"
+        .type="${item.contentType}"
+        @type-changed="${this._typeChangeHandler}"
         .model="${item}"
         ?outlined="${outlined}"
         ?compatibility="${compatibility}"
@@ -734,11 +738,11 @@ export class MultipartPayloadEditor extends ApiFormMixin(ValidatableMixin(LitEle
     const model = this.model || [];
     return html`
       ${renderOptionalCheckbox ? html`<div class="optional-checkbox">
-        <anypoint-checkbox
+        <anypoint-switch
           class="toggle-checkbox"
           .checked="${optionalOpened}"
-          @checked-changed="${this._optionalHanlder}"
-          title="Shows or hides optional parameters">Show optional parameters</anypoint-checkbox>
+          @change="${this._optionalHandler}"
+          title="Shows or hides optional parameters">Show optional parameters</anypoint-switch>
       </div>` : undefined}
       <iron-form>
         <form enctype="multipart/form-data" method="post">
